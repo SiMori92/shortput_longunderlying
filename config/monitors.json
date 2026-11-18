@@ -37,5 +37,27 @@
         "source": null
       }
     ]
+  },
+  {
+    "symbol": "SOXL",
+    "identityTerms": [
+      "3X",
+      "SEMICONDUCTOR"
+    ],
+    "historySessions": 200,
+    "smaFast": 50,
+    "smaSlow": 200,
+    "rvWindow": 20,
+    "volBrake": 1.6,
+    "premiumRatio": 1.1,
+    "premiumSessions": 20,
+    "maxSpread": 0.1,
+    "minOpenInterest": 500,
+    "targetDelta": 0.2,
+    "deltaTolerance": 0.05,
+    "postUnlockSessions": 20,
+    "ipoPrice": null,
+    "ipoSource": "Not applicable: SOXX is a mature reference ETF",
+    "unlocks": []
   }
 ]

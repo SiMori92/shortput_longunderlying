@@ -3,7 +3,7 @@ import { rm } from "node:fs/promises";
 test.describe.configure({ mode: "serial" });
 test.beforeAll(async () => { await rm(".e2e-data/auth", { recursive: true, force: true }); });
 test("anonymous pages, RSC and APIs are private; health and login are public", async ({ page, request }) => {
-  for (const path of ["/", "/gate", "/puts", "/portfolio", "/spax", "/backtest", "/rules", "/unknown"]) {
+  for (const path of ["/", "/gate", "/puts", "/portfolio", "/monitor", "/spax", "/backtest", "/rules", "/unknown"]) {
     const response = await request.get(path, { maxRedirects: 0 }); expect(response.status()).toBe(307); expect(response.headers().location).toContain("/login");
   }
   for (const path of ["/api/runs", "/api/portfolio", "/api/monitors", "/api/unknown"]) expect((await request.get(path)).status()).toBe(401);
@@ -19,6 +19,13 @@ test("account name + password login, secure browser cookie and logout", async ({
   await expect(page.getByRole("heading",{name:"Today",exact:true})).toBeVisible();
   const cookie=(await context.cookies()).find(c=>c.name==="__Host-strategy_session"); expect(cookie).toMatchObject({httpOnly:true,secure:true,sameSite:"Strict",path:"/"});
   await page.goto("/portfolio"); await expect(page.getByRole("button",{name:"Save snapshot",exact:true})).toBeEnabled();
+  // Ticker switcher: every page follows the selection, and it survives navigation.
+  await page.getByRole("group",{name:"Ticker"}).getByRole("button",{name:"SPAX",exact:true}).click();
+  await expect(page.getByText("ENTERED ACCOUNT · SPAX",{exact:true})).toBeVisible();
+  await page.goto("/"); await expect(page.getByText("V3.1 · SPAX vs SPCX",{exact:true})).toBeVisible();
+  await page.goto("/spax"); await expect(page).toHaveURL(/\/monitor$/); await expect(page.getByRole("heading",{name:"SPAX monitor",exact:true})).toBeVisible();
+  await page.getByRole("group",{name:"Ticker"}).getByRole("button",{name:"SOXL",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"SOXL monitor",exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Sign out",exact:true}).click(); await expect(page).toHaveURL(/\/login$/); expect((await context.cookies()).some(c=>c.name==="__Host-strategy_session")).toBe(false);
   const wrongName=await context.request.post("/api/auth/login",{headers:{origin:"http://127.0.0.1:3100"},data:{username:"someone-else",password:"playwright-only-password-2026"}}); expect(wrongName.status()).toBe(401);
 });

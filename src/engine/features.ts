@@ -2,16 +2,16 @@ import type { Rules } from "../schemas/config";
 import type { Feature, History } from "./types";
 import { realizedVolatility, rollingMean } from "./statistics";
 import { weekId } from "./dates";
-export function buildFeatures(history: History, rules: Rules): Feature[] {
-  const base = history.SOXL ?? [];
-  // Join exactly on SOXL dates, then forward-fill. An off-axis reference observation
+export function buildFeatures(history: History, rules: Rules, pair: { symbol: string; reference: string } = { symbol: "SOXL", reference: "SOXX" }): Feature[] {
+  const base = history[pair.symbol] ?? [];
+  // Join exactly on the traded ETF's dates, then forward-fill. An off-axis reference observation
   // must not leak into the join (pandas left join + ffill, not an as-of join).
-  const refs = ["SOXX", "SPY", "^VIX", "^IRX"].map(s => new Map((history[s] ?? []).map(b => [b.date, b.close])));
+  const refs = [pair.reference, "SPY", "^VIX", "^IRX"].map(s => new Map((history[s] ?? []).map(b => [b.date, b.close])));
   const last: (number | undefined)[] = Array(4).fill(undefined);
   const joined = base.flatMap(bar => {
     refs.forEach((map, i) => { const value = map.get(bar.date); if (value !== undefined) last[i] = value; });
     if (last.some(v => v === undefined)) return [];
-    if (!(bar.close > 0)) throw new Error("SOXL close must be positive");
+    if (!(bar.close > 0)) throw new Error(`${pair.symbol} close must be positive`);
     return [{ date: bar.date, S: bar.close, H: bar.high, L: bar.low, REF: last[0]!, SPY: last[1]!, VIX: last[2]! / 100, RF: last[3]! / 100 }];
   });
   const closes = joined.map(r => r.S); const reference = joined.map(r => r.REF);

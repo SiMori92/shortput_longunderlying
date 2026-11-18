@@ -63,6 +63,10 @@ Do not set `RAILWAY_VOLUME_MOUNT_PATH` yourself: Railway provides it when the vo
 
 The SOXX split and ^IRX gaps are reviewed and ship in `config/`; a redeploy merges them into the volume automatically. Recommendations still need a same-day account snapshot.
 
+## Tickers
+
+Use the SOXL / SPAX switcher in the header. SOXL data stays where it was on the volume; SPAX runs, portfolio and backtests live under `/app/data/strategies/SPAX/`. Each scheduled run updates market data once and stores a run for both tickers. Enter SPAX account snapshots separately on the Portfolio page while SPAX is selected.
+
 ## 5. Subsequent automatic deployments
 
 Make future edits in the local `WebApp/` checkout (now the Git root), then:

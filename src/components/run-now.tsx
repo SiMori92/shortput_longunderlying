@@ -3,15 +3,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { RunResponseSchema } from "@/schemas/run";
-export function RunNow() {
+import type { StrategySymbol } from "@/strategy/symbols";
+export function RunNow({ symbol }: { symbol: StrategySymbol }) {
   const [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   const router = useRouter();
   async function run() {
     setBusy(true); setMessage("");
     try {
-      const response = await fetch("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ type: "final" }) });
+      const response = await fetch("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ type: "final", symbol }) });
       const value = RunResponseSchema.parse(await response.json());
-      setMessage("error" in value ? value.message : `${value.asOf}: ${value.freshness.status}${value.freshness.actionsBlocked ? " · actions blocked" : ""}`);
+      setMessage("error" in value ? value.message : `${value.symbol} ${value.asOf}: ${value.freshness.status}${value.freshness.actionsBlocked ? " · actions blocked" : ""}`);
       if (!("error" in value)) router.refresh();
     } catch { setMessage("Run unavailable. Previous valid final retained."); }
     finally { setBusy(false); }

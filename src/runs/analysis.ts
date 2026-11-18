@@ -7,14 +7,15 @@ import { coreRebalance, coreTarget, evaluateGate, gateState, initialState, model
 import { futureExpiries } from "../market/calendar";
 import { dataIssue } from "../market/validation";
 type Base = Pick<RunResult, "type" | "timestamp" | "asOf">;
-export function analyzeRun(base: Base, features: readonly Feature[], rules: Rules, history: History, snapshots: readonly PortfolioEntry[], issues: readonly DataIssue[], symbols: RunResult["freshness"]["symbols"]): RunResult {
-  const problems = [...issues];
-  if (features.filter(f => f.date <= base.asOf).length < rules.smaSlow) problems.push(dataIssue("history", "SOXX", "Insufficient post-feature-drop gate SMA history"));
+export function analyzeRun(base: Base, features: readonly Feature[], rules: Rules, history: History, snapshots: readonly PortfolioEntry[], issues: readonly DataIssue[], symbols: RunResult["freshness"]["symbols"], pair: { symbol: RunResult["symbol"]; reference: string } = { symbol: "SOXL", reference: "SOXX" }): RunResult {
+  const problems = [...issues], { symbol: S, reference: REF } = pair;
+  const warmed = features.filter(f => f.date <= base.asOf).length;
+  if (warmed < rules.smaSlow) problems.push(dataIssue("history", REF, warmed === 0 ? `Insufficient history: ${history[REF]?.filter(b => b.date <= base.asOf).length ?? 0} ${REF} sessions stored; the gate needs SMA${rules.smaSlow} plus RV60 warm-up` : "Insufficient post-feature-drop gate SMA history"));
   const row = features.find(f => f.date === base.asOf), marketBlocked = problems.some(i => i.blocking) || !row;
-  if (!row) problems.push(dataIssue("history", "SOXL", "No fully warmed-up feature row at run date"));
+  if (!row) problems.push(dataIssue("history", S, "No fully warmed-up feature row at run date"));
   const snapshot = snapshots.find(s => s.date === base.asOf);
   if (!snapshot) problems.push(dataIssue("account", null, "Current account snapshot unconfirmed; recommendations blocked"));
-  if (snapshot?.openPuts.some(p => p.symbol !== "SOXL")) problems.push(dataIssue("account", null, "Non-SOXL puts in snapshot cannot be valued by this strategy"));
+  if (snapshot?.openPuts.some(p => p.symbol !== S)) problems.push(dataIssue("account", null, `Non-${S} puts in snapshot cannot be valued by this strategy`));
   let gate: RunResult["gate"] = null, core: RunResult["core"] = null, put: RunResult["put"] = null, account: RunResult["account"] = null;
   let openPutActions: RunResult["openPutActions"] = [];
   const rawGate = row ? prepareGates(features, rules)[features.indexOf(row)] ?? evaluateGate(row, rules) : null;
@@ -31,9 +32,9 @@ export function analyzeRun(base: Base, features: readonly Feature[], rules: Rule
       return { value, threshold, distance, passes, closeCall: base.type === "preview" && Math.abs(distance) <= .01 };
     };
     gate = { a: condition(row.REF, slow, rawGate.a), b: condition(fast, slow, rawGate.b), c: condition(ratio, rules.rvSpike, rawGate.c, true), state: gateState(rawGate, null, rules), gateOn: rawGate.gateOn, multiplier: rawGate.mult, putOk: rawGate.putOk };
-    work("gate.a.value", "SOXX raw close", { date: row.date, symbol: "SOXX" }, row.REF);
-    work("gate.a.threshold", "mean(last smaSlow SOXX closes after feature warm-up)", { n: rules.smaSlow, sum: tail.reduce((s, f) => s + f.REF, 0) }, slow);
-    work("gate.b.value", "mean(last smaFast SOXX closes after feature warm-up)", { n: rules.smaFast, sum: fastTail.reduce((s, f) => s + f.REF, 0) }, fast);
+    work("gate.a.value", `${REF} raw close`, { date: row.date, symbol: REF }, row.REF);
+    work("gate.a.threshold", `mean(last smaSlow ${REF} closes after feature warm-up)`, { n: rules.smaSlow, sum: tail.reduce((s, f) => s + f.REF, 0) }, slow);
+    work("gate.b.value", `mean(last smaFast ${REF} closes after feature warm-up)`, { n: rules.smaFast, sum: fastTail.reduce((s, f) => s + f.REF, 0) }, fast);
     work("gate.b.threshold", "gate.a.threshold", { SMA200: slow }, slow);
     work("gate.c.value", "RV60 > 0 ? RV10 / RV60 : 0", { RV10: row.RV10, RV60: row.RV60 }, ratio);
     work("gate.c.threshold", "rules.rvSpike", { rvSpike: rules.rvSpike }, rules.rvSpike);
@@ -77,7 +78,7 @@ export function analyzeRun(base: Base, features: readonly Feature[], rules: Rule
         const formulas = { weekly: "notionalPerWeek*equity/K", total: "max(0,maxPutNotional*equity-openNotional)/K", gap: "unit>0?max(0,(gapBudget*equity-used)/unit):unlimited" };
         put.limits.forEach((l, i) => work(`put.limits.${i}.modelQuantity`, formulas[l.name], { equity: result.day.equity, K: entry.K, notionalPerWeek: rules.notionalPerWeek, maxPutNotional: rules.maxPutNotional, openNotional: limits.openNotional, gapBudget: rules.gapBudget, used: limits.used, unit: limits.unit }, l.modelQuantity));
       }
-      work("core.price", "SOXL raw close (provisional quote during preview)", { date: row.date }, row.S);
+      work("core.price", `${S} raw close (provisional quote during preview)`, { date: row.date }, row.S);
       work("core.rvFast", "max(RV10,RV20)", { RV10: row.RV10, RV20: row.RV20 }, row.RVfast);
       work("core.previousEquity", "Entered NAV at decision close; yesterday equity for next-close execution", { snapshotDate: snapshot.date }, snapshot.accountValue);
       work("core.targetWeight", "gateOn?min(min(coreCap,coreVolTarget/max(RVfast,1e-6))*mult,gapBudget/gapSize):0", { gateOn: rawGate.gateOn, coreCap: rules.coreCap, coreVolTarget: rules.coreVolTarget, RVfast: row.RVfast, mult: rawGate.mult, gapBudget: rules.gapBudget, gapSize: rules.gapSize }, target);
@@ -87,7 +88,7 @@ export function analyzeRun(base: Base, features: readonly Feature[], rules: Rule
       if (core.trade) {
         work("core.trade.modelQuantity", "targetShares-heldShares", { targetShares: core.modelShares, heldShares: snapshot.shares }, core.trade.modelQuantity);
         work("core.trade.roundedQuantity", "floor(targetShares)-heldShares", { targetShares: core.modelShares, heldShares: snapshot.shares }, core.trade.roundedQuantity);
-        work("core.trade.modelPrice", "SOXL decision close; future execution price unconfirmed", { S: row.S }, row.S);
+        work("core.trade.modelPrice", `${S} decision close; future execution price unconfirmed`, { S: row.S }, row.S);
       }
       work("account.equity", "Entered account NAV, not replay equity", { snapshotDate: snapshot.date }, account.equity);
       work("account.peak", "max(entered NAV snapshots through run date)", { count: snapshots.filter(s => s.date <= base.asOf).length }, peak);
@@ -104,8 +105,8 @@ export function analyzeRun(base: Base, features: readonly Feature[], rules: Rule
     }
   }
   const actionsBlocked = marketBlocked || problems.some(p => p.blocking) || account === null;
-  const result: RunResult = { schemaVersion: 1, id: `${base.asOf}_${base.type}`, ...base, rulesId: "v3_1", freshness: { status: marketBlocked ? "blocked" : base.type === "preview" ? "provisional" : "valid", issues: problems, symbols, actionsBlocked }, gate, core, put, openPutActions, account,
-    spax: { verdict: "NOT READY", checks: ["history", "trend", "vol", "premium", "options", "unlocks"].map(id => ({ id: id as RunResult["spax"]["checks"][number]["id"], status: "unconfirmed", value: id === "history" ? `${history.SPCX?.length ?? 0} SPCX / ${history.SPAX?.length ?? 0} SPAX bars` : null })), warnings: ["Monitor only; full qualification and manual option inputs arrive in M6", ...problems.filter(p => p.symbol === "SPAX" || p.symbol === "SPCX").map(p => p.message)] }, changesSincePreview: [], working };
+  const result: RunResult = { schemaVersion: 1, symbol: S, id: `${base.asOf}_${base.type}`, ...base, rulesId: "v3_1", freshness: { status: marketBlocked ? "blocked" : base.type === "preview" ? "provisional" : "valid", issues: problems, symbols, actionsBlocked }, gate, core, put, openPutActions, account,
+    spax: { verdict: "NOT READY", checks: ["history", "trend", "vol", "premium", "options", "unlocks"].map(id => ({ id: id as RunResult["spax"]["checks"][number]["id"], status: "unconfirmed", value: id === "history" ? `${history[REF]?.length ?? 0} ${REF} / ${history[S]?.length ?? 0} ${S} bars` : null })), warnings: ["Monitor checklist not attached to this run", ...problems.filter(p => p.symbol === S || p.symbol === REF).map(p => p.message)] }, changesSincePreview: [], working };
   // Source counts are numeric too; every numeric leaf has an in-place working entry.
   symbols.forEach((s, i) => work(`freshness.symbols.${i}.count`, "count(validated bars through asOf)", { symbol: s.symbol, asOf: base.asOf }, s.count));
   return RunResultSchema.parse(result);

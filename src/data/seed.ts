@@ -8,6 +8,8 @@ import { RulesSchema, UnderlyingsSchema } from "../schemas/config";
 import { KnownGapsSchema, KnownSplitsSchema } from "../schemas/market";
 import { JournalSchema, PortfolioEntriesSchema } from "../schemas/portfolio";
 import { atomicWrite, dataRoot, isMissing, readJson } from "./store";
+import { STRATEGY_SYMBOLS } from "../strategy/symbols";
+import { strategyRoot } from "../strategy/paths";
 const numeric = z.string().min(1).transform(Number).pipe(z.number().finite());
 const CsvRowSchema = z.object({ date: z.iso.date(), open: numeric, high: numeric, low: numeric, close: numeric, volume: numeric, adjclose: numeric });
 export function parseSeedCsv(csv: string, symbol: string): Bars {
@@ -36,7 +38,11 @@ export async function seedData(root = dataRoot(), source = process.cwd()) {
   for (const rule of ["v3_1.json", "archive/v3.json"]) await initialize(path.join(root, "config/rules", rule), RulesSchema, () => readJson(path.join(source, "config/rules", rule), RulesSchema));
   await mergeReviewed(path.join(root, "config/known-splits.json"), path.join(source, "config/known-splits.json"), KnownSplitsSchema);
   await mergeReviewed(path.join(root, "config/known-gaps.json"), path.join(source, "config/known-gaps.json"), KnownGapsSchema);
-  await initialize(path.join(root, "config/monitors.json"), MonitorConfigsSchema, () => readJson(path.join(source, "config/monitors.json"), MonitorConfigsSchema));
+  // Add monitor configs for newly supported symbols; never alter a config already on the volume.
+  const monitorsFile = path.join(root, "config/monitors.json"), shippedMonitors = await readJson(path.join(source, "config/monitors.json"), MonitorConfigsSchema);
+  const monitors = await initialize(monitorsFile, MonitorConfigsSchema, async () => shippedMonitors);
+  const newMonitors = shippedMonitors.filter(m => !monitors.some(c => c.symbol === m.symbol));
+  if (newMonitors.length) { await atomicWrite(monitorsFile, MonitorConfigsSchema, [...monitors, ...newMonitors]); console.info(`[seed] Added monitor config: ${newMonitors.map(m => m.symbol).join(", ")}`); }
   await initialize(path.join(root, "monitors/observations.json"), ObservationsSchema, async () => []);
   const counts: Record<string, number> = {};
   for (const underlying of underlyings) {
@@ -45,7 +51,10 @@ export async function seedData(root = dataRoot(), source = process.cwd()) {
     if (bars.symbol !== underlying.symbol) throw new Error(`Stored symbol mismatch: ${underlying.symbol}`);
     counts[underlying.symbol] = bars.bars.length;
   }
-  await initialize(path.join(root, "portfolio/entries.json"), PortfolioEntriesSchema, async () => []);
-  await initialize(path.join(root, "portfolio/journal.json"), JournalSchema, async () => []);
+  for (const symbol of STRATEGY_SYMBOLS) {
+    const dir = strategyRoot(root, symbol);
+    await initialize(path.join(dir, "portfolio/entries.json"), PortfolioEntriesSchema, async () => []);
+    await initialize(path.join(dir, "portfolio/journal.json"), JournalSchema, async () => []);
+  }
   return counts;
 }

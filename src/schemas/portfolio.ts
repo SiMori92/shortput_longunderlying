@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { DateSchema, NumberSchema, PositiveSchema, SymbolSchema } from "./common";
-export const PortfolioPutSchema = z.strictObject({ id: z.string().min(1).max(100), symbol: SymbolSchema.refine((v): boolean => v === "SOXL", "Only SOXL puts are supported in v1"), opened: DateSchema, strike: PositiveSchema, expiry: DateSchema, contracts: PositiveSchema.int().max(1000000), credit: NumberSchema.nonnegative() }).refine(p => p.expiry >= p.opened, { message: "Expiry precedes opening", path: ["expiry"] });
+import { DateSchema, NumberSchema, PositiveSchema } from "./common";
+import { StrategySymbolSchema } from "../strategy/symbols";
+export const PortfolioPutSchema = z.strictObject({ id: z.string().min(1).max(100), symbol: StrategySymbolSchema, opened: DateSchema, strike: PositiveSchema, expiry: DateSchema, contracts: PositiveSchema.int().max(1000000), credit: NumberSchema.nonnegative() }).refine(p => p.expiry >= p.opened, { message: "Expiry precedes opening", path: ["expiry"] });
 export const PortfolioEntrySchema = z.strictObject({ date: DateSchema, accountValue: PositiveSchema, shares: NumberSchema.nonnegative().int().max(1000000000), openPuts: z.array(PortfolioPutSchema).max(100) }).superRefine((p, ctx) => {
   if (new Set(p.openPuts.map(v => v.id)).size !== p.openPuts.length) ctx.addIssue({ code: "custom", path: ["openPuts"], message: "Duplicate put ID" });
   p.openPuts.forEach((v, i) => { if (v.opened > p.date) ctx.addIssue({ code: "custom", path: ["openPuts", i, "opened"], message: "Opening is after snapshot" }); });

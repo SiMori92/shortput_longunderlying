@@ -2,8 +2,9 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Save, Trash2, NotebookPen, Wallet } from "lucide-react";
+import type { StrategySymbol } from "@/strategy/symbols";
 import { PortfolioEntrySchema, PortfolioCommandSchema, PortfolioStateSchema, PortfolioErrorSchema, type PortfolioEntry, type PortfolioState } from "@/schemas/portfolio";
-export function PortfolioEditor({ initial, selected, date, authorized }: { initial: PortfolioState; selected?: PortfolioEntry; date: string; authorized: boolean }) {
+export function PortfolioEditor({ initial, selected, date, authorized, symbol }: { initial: PortfolioState; selected?: PortfolioEntry; date: string; authorized: boolean; symbol: StrategySymbol }) {
   const router = useRouter();
   const [state, setState] = useState(initial), [puts, setPuts] = useState(selected?.openPuts ?? []);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState("");
@@ -13,7 +14,7 @@ export function PortfolioEditor({ initial, selected, date, authorized }: { initi
     if (!parsed.success) { setErrors(Object.fromEntries(parsed.error.issues.map(i => [i.path.join("."), i.message]))); setMessage("Check the highlighted fields."); return false; }
     setBusy(true); setMessage(""); setErrors({});
     try {
-      const response = await fetch("/api/portfolio", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(parsed.data) });
+      const response = await fetch(`/api/portfolio?symbol=${symbol}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(parsed.data) });
       const value: unknown = await response.json();
       if (!response.ok) { setMessage(PortfolioErrorSchema.parse(value).message); return false; }
       setState(PortfolioStateSchema.parse(value)); setMessage(parsed.data.operation === "snapshot" ? "Snapshot saved. Stored runs are unchanged; run again for updated recommendations." : "Journal entry saved.");
@@ -33,13 +34,13 @@ export function PortfolioEditor({ initial, selected, date, authorized }: { initi
     {!authorized && <div className="notice warning">Saving requires a signed-in session. Sign in to save changes.</div>}
     <div aria-live="polite" role="status">{message}</div>
     <form className="card" onSubmit={snapshot}>
-      <div className="section-heading"><h2><Wallet size={20} />Daily snapshot</h2><span className="chip">Entered NAV · SOXL</span></div>
+      <div className="section-heading"><h2><Wallet size={20} />Daily snapshot</h2><span className="chip">Entered NAV · {symbol}</span></div>
       <fieldset disabled={busy} className="portfolio-fields"><div className="entry-grid">
         <label>Snapshot date<input required name="date" type="date" defaultValue={date} />{fieldError("date")}</label>
         <label>Account value ($)<input required name="accountValue" type="number" inputMode="decimal" step="0.01" min="0.01" defaultValue={selected?.accountValue ?? ""} />{fieldError("accountValue")}</label>
-        <label>SOXL shares<input required name="shares" type="number" inputMode="numeric" step="1" min="0" defaultValue={selected?.shares ?? 0} />{fieldError("shares")}</label>
+        <label>{symbol} shares<input required name="shares" type="number" inputMode="numeric" step="1" min="0" defaultValue={selected?.shares ?? 0} />{fieldError("shares")}</label>
       </div>
-      <div className="section-heading"><h3>Open puts</h3><button type="button" className="button" onClick={() => setPuts([...puts, { id: crypto.randomUUID(), symbol: "SOXL", opened: date, expiry: date, strike: 0, contracts: 1, credit: 0 }])}><Plus size={18} />Add put</button></div>
+      <div className="section-heading"><h3>Open puts</h3><button type="button" className="button" onClick={() => setPuts([...puts, { id: crypto.randomUUID(), symbol, opened: date, expiry: date, strike: 0, contracts: 1, credit: 0 }])}><Plus size={18} />Add put</button></div>
       <p className="muted">Net credit per share · actual entry · whole contracts</p>
       {fieldError("openPuts")}
       {puts.length === 0 && <div className="empty-state">No open puts entered</div>}

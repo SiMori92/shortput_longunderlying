@@ -1,12 +1,14 @@
 import { authenticated, sameOrigin } from "@/auth/session";
 import { PortfolioCommandSchema, PortfolioErrorSchema, PortfolioStateSchema } from "@/schemas/portfolio";
 import { PortfolioConflict, PortfolioInputError, readPortfolio, savePortfolio } from "@/portfolio/service";
+import { dataRoot } from "@/data/store";
+import { requestStrategy } from "@/strategy/symbols";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "no-store" };
 function error(kind: "unauthorized" | "forbidden" | "invalid-input" | "conflict" | "unavailable", message: string, status: number) { return Response.json(PortfolioErrorSchema.parse({ error: kind, message }), { status, headers }); }
 export async function GET(request: Request) {
   if (!authenticated(request)) return error("unauthorized", "Signed-in session required. Sign in to continue.", 401);
-  try { return Response.json(PortfolioStateSchema.parse(await readPortfolio()), { headers }); } catch { return error("unavailable", "Stored portfolio failed validation.", 503); }
+  try { return Response.json(PortfolioStateSchema.parse(await readPortfolio(dataRoot(), requestStrategy(request))), { headers }); } catch { return error("unavailable", "Stored portfolio failed validation.", 503); }
 }
 export async function PUT(request: Request) {
   if (!authenticated(request)) return error("unauthorized", "Signed-in session required. Sign in to continue.", 401);
@@ -19,7 +21,7 @@ export async function PUT(request: Request) {
     while (true) { const next = await reader.read(); if (next.done) break; length += next.value.length; if (length > 65536) { await reader.cancel(); throw new Error("Too large"); } chunks.push(next.value); }
     input = PortfolioCommandSchema.parse(JSON.parse(Buffer.concat(chunks).toString("utf8")));
   } catch { return error("invalid-input", "Invalid portfolio input (maximum 64KB). Check dates, whole quantities and nonnegative credits.", 400); }
-  try { return Response.json(PortfolioStateSchema.parse(await savePortfolio(input)), { headers }); }
+  try { return Response.json(PortfolioStateSchema.parse(await savePortfolio(input, dataRoot(), new Date(), requestStrategy(request))), { headers }); }
   catch (e) {
     if (e instanceof PortfolioConflict) return error("conflict", e.message, 409);
     if (e instanceof PortfolioInputError) return error("invalid-input", e.message, 400);

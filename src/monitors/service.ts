@@ -23,7 +23,7 @@ export class MonitorInputError extends Error {}
 export async function saveObservation(input:unknown,root=dataRoot(),now=new Date()) {
   const command=ObservationCommandSchema.parse(input),o=command.observation;
   const [registry,configs]=await Promise.all([readJson(path.join(root,"config/underlyings.json"),UnderlyingsSchema),readJson(path.join(root,"config/monitors.json"),MonitorConfigsSchema)]);
-  if(!registry.some(u=>u.symbol===o.symbol&&u.role==="monitor")||!configs.some(c=>c.symbol===o.symbol))throw new MonitorInputError("Choose a configured monitor symbol.");
+  if(!registry.some(u=>u.symbol===o.symbol)||!configs.some(c=>c.symbol===o.symbol))throw new MonitorInputError("Choose a configured monitor symbol.");
   if(o.date<"2010-01-01"||o.date>marketDate(now)||!session(o.date))throw new MonitorInputError("Choose an elapsed or current NYSE session.");
   if(o.expiry&&(o.expiry>"2028-12-31"||o.expiry<"2010-01-01"||!session(o.expiry)))throw new MonitorInputError("Expiry must be a known NYSE session.");
   const file=path.join(root,"monitors/.write.lock");let lock;
@@ -58,7 +58,8 @@ export async function loadMonitors(options:{root?:string;asOf?:string;history?:H
   const root=options.root??dataRoot(),asOf=options.asOf??expectedClose(new Date());
   const [registry,configs,state,update]=await Promise.all([readJson(path.join(root,"config/underlyings.json"),UnderlyingsSchema),readJson(path.join(root,"config/monitors.json"),MonitorConfigsSchema),readObservations(root),optionalJson(path.join(root,"updates/latest.json"),UpdateStatusSchema)]);
   const results:MonitorResult[]=[];
-  for(const u of registry.filter(u=>u.role==="monitor")) {
+  // Every registered symbol with a monitor config gets the checklist (SOXL and SPAX).
+  for(const u of registry.filter(u=>configs.some(c=>c.symbol===u.symbol))) {
     const config=configs.find(c=>c.symbol===u.symbol);
     if(!config||!u.reference||u.leverage===null)throw new Error(`Missing monitor parameters/reference/leverage for ${u.symbol}`);
     if(!registry.some(r=>r.symbol===u.reference))throw new Error(`Missing reference registration for ${u.symbol}`);

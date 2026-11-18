@@ -33,7 +33,7 @@ export async function updateMarket(options: { now: Date; asOf: string; preview: 
           updated = result.stored.bars.length !== bars.length;
           history[u.symbol] = result.view;
         } else history[u.symbol] = bars.filter(b => b.date <= options.asOf);
-        if (u.role === "monitor") {
+        if (monitorConfigs.some(c => c.symbol === u.symbol)) {
           const terms = monitorConfigs.find(c => c.symbol === u.symbol)?.identityTerms;
           const last = result.view.at(-1), named = !!terms?.length && terms.every(t => (chart.meta.longName ?? "").toUpperCase().includes(t.toUpperCase())) && chart.meta.instrumentType === "ETF";
           await atomicWrite(path.join(root, "facts", `${u.symbol}.json`), MarketFactsSchema, {

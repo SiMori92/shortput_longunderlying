@@ -30,7 +30,7 @@ export function actionsAvailable(run: RunResult | null, expectedDate: string) {
 export const PutRowSchema = z.strictObject({ id: z.string(), opened: DateSchema, expiry: DateSchema, strike: N, contracts: N, credit: N, value: N, captured: N.nullable(), distance: N, buyback: N, threshold: N, status: z.enum(["HOLD", "BUY BACK", "EXPIRY"]) });
 export type PutRow = z.infer<typeof PutRowSchema>;
 export function markPuts(snapshot: PortfolioEntry, row: Feature, rules: Rules, storedMarks?: readonly number[]): PutRow[] {
-  return z.array(PutRowSchema).parse(snapshot.openPuts.filter(p => p.symbol === "SOXL").map((p, i) => {
+  return z.array(PutRowSchema).parse(snapshot.openPuts.map((p, i) => {
     const value = storedMarks?.[i] ?? modelPutValue(row, { K: p.strike, expiry: p.expiry }, rules);
     return { id: p.id, opened: p.opened, expiry: p.expiry, strike: p.strike, contracts: p.contracts, credit: p.credit, value, captured: p.credit > 0 ? 1 - value / p.credit : null, distance: row.S / p.strike - 1, buyback: row.date >= p.expiry ? Math.max(p.strike - row.S, 0) : value * (1 + rules.premiumSlippage) + commissionPerShare(row, rules), threshold: (1 - rules.profitTake) * p.credit, status: row.date >= p.expiry ? "EXPIRY" : value <= (1 - rules.profitTake) * p.credit ? "BUY BACK" : "HOLD" };
   }));

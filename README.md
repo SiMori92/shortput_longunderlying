@@ -24,6 +24,22 @@ Startup also seeds an empty disk in production. The build itself does not seed d
 
 Optional `DATA_DIR` selects the writable data directory (default `./data`). Use one Node process and a persistent local filesystem; do not run multiple replicas or simultaneous seed commands against one directory. `pnpm seed` is available for diagnostics but is not required for startup. All JSON writes validate first, write a private unique temporary file in the destination directory, then rename it atomically. Existing valid data is retained; malformed existing files abort startup and are never silently replaced. Atomic replacement prevents partial reads; portfolio mutations additionally use an exclusive process lock and a combined entries/journal SHA-256 revision to reject stale-tab overwrites (409). A crashed process can leave `data/portfolio/.write.lock`; inspect the server process before manually removing that lock. Never remove an active writer’s lock.
 
+## Tickers: SOXL and SPAX
+
+A header switcher (SOXL / SPAX) picks the ticker every page renders for: Today, Gate, Puts, Portfolio, Monitor, Backtest and Rules. The choice is stored in a non-sensitive `strategy_symbol` cookie for a year. The former SPAX tab is now **Monitor** (`/spax` redirects there) and shows the selected ticker's qualification checklist.
+
+| Ticker | Reference (gate) | Leverage | Data location |
+|---|---|---|---|
+| SOXL | SOXX | 3× | data root (unchanged: `runs/`, `portfolio/`, `backtest/`) |
+| SPAX | SPCX | 2× | `strategies/SPAX/` (`runs/`, `portfolio/`, `backtest/`) |
+
+- Both tickers use the same V3.1 rules (`config/rules/v3_1.json`); split factors come from each ticker's reviewed splits in `config/known-splits.json`.
+- One market update serves both tickers. Each run is then analyzed and stored separately, and a ticker is blocked only by its own inputs (ticker, reference, SPY, ^VIX, ^IRX). A SPAX data problem no longer blocks SOXL.
+- Portfolios are separate: each ticker has its own snapshots, journal and puts (a SPAX snapshot only accepts SPAX puts).
+- SPAX had ~110 SPCX sessions in Nov 2026. The gate needs SMA200 plus RV60 warm-up, so SPAX stays blocked with an explicit "Insufficient history" issue until about March 2027, and its Backtest page explains the same.
+- On startup, monitor configs for newly supported tickers are added to the volume's `config/monitors.json` (add-only), and empty `strategies/<SYMBOL>/portfolio` files are created.
+- APIs accept `?symbol=SOXL|SPAX` (falling back to the cookie): `GET/POST /api/runs` (POST also accepts `symbol` in the body) and `GET/PUT /api/portfolio`. `pnpm run:now final <date> SPAX` runs from the CLI.
+
 ## Source and storage
 
 `seed/bars/*.csv` are byte-for-byte copies of the six supplied CSVs from `../Backtest/Backtest_app/v2_engine/data_merged_2026-11-16/`. They are bundled so a clone containing only `WebApp/` can start. `seed/manifest.json` records SHA-256 provenance. The source folders and original plan/prompt are not modified.

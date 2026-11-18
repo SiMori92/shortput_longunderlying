@@ -95,8 +95,12 @@ it("a new split prevents bar writes, and any configured monitor data failure blo
   expect(await readFile(path.join(root, "bars/SOXL.json"), "utf8")).toBe(before);
   const instruments = await readJson("config/underlyings.json", UnderlyingsSchema);
   await atomicWrite(path.join(root, "config/underlyings.json"), UnderlyingsSchema, instruments);
-  const monitorFailure = await createRun({ type: "final", date: "2026-11-16" }, { root, fetcher, now });
-  expect(monitorFailure.freshness.issues.some(i => i.symbol === "SPAX" && i.blocking)).toBe(true);
+  // Each ticker is blocked only by its own inputs: a SPAX data failure blocks SPAX, never SOXL.
+  const soxl = await createRun({ type: "final", date: "2026-11-16" }, { root, fetcher, now });
+  expect(soxl.freshness.issues.some(i => i.symbol === "SPAX" || i.symbol === "SPCX")).toBe(false);
+  const monitorFailure = await createRun({ type: "final", date: "2026-11-16", symbol: "SPAX" }, { root, fetcher, now });
+  expect(monitorFailure.symbol).toBe("SPAX");
+  expect(monitorFailure.freshness.issues.some(i => (i.symbol === "SPAX" || i.symbol === "SPCX") && i.blocking)).toBe(true);
   expect(monitorFailure.freshness.status).toBe("blocked");
 });
 it("historical reruns never roll back latest final or nightly replay", async () => {
@@ -124,9 +128,19 @@ it("persists full monitor JSON during final and preview runs without adding moni
  await atomicWrite(path.join(root,"config/underlyings.json"),UnderlyingsSchema,[...registry,{symbol:"SPCX",role:"reference",leverage:1,reference:null,seedFile:"SPCX.csv"},{symbol:"SPAX",role:"monitor",leverage:2,reference:"SPCX",seedFile:null}]);
  // Provider unavailability is deliberate: monitor failure must stay honest in stored results.
  for(const type of ["final","preview"] as const){
-  const run=await createRun({type,date:"2026-11-16"},{root,fetcher,now:new Date(type==="preview"?"2026-11-16T20:40:00Z":"2026-11-16T21:20:00Z")});
+  const run=await createRun({type,date:"2026-11-16",symbol:"SPAX"},{root,fetcher,now:new Date(type==="preview"?"2026-11-16T20:40:00Z":"2026-11-16T21:20:00Z")});
   expect(run.spax.monitor?.checks).toHaveLength(6);expect(run.spax.monitor?.verdict).toBe("NOT READY");expect(run.spax.monitor?.dataStatus).toBe(type==="preview"?"provisional":"unconfirmed");
-  const persisted=await readJson(path.join(root,"runs/last-attempt.json"),RunResultSchema);expect(persisted.spax.monitor).toEqual(run.spax.monitor);expect(run.working["spax.monitor.stats.1.count"]!.result).toBe(98);
-  expect(JSON.parse(await readFile(path.join(root,"monitors/latest.json"),"utf8"))[0].symbol).toBe("SPAX");
+  const persisted=await readJson(path.join(root,"strategies/SPAX/runs/last-attempt.json"),RunResultSchema);expect(persisted.spax.monitor).toEqual(run.spax.monitor);expect(run.working["spax.monitor.stats.1.count"]!.result).toBe(98);
+  expect(JSON.parse(await readFile(path.join(root,"monitors/latest.json"),"utf8")).map((m:{symbol:string})=>m.symbol)).toContain("SPAX");
  }
+});
+it("one run stores each ticker separately and returns the requested ticker", async () => {
+  const { root, fetcher } = await setup(), now = new Date("2026-11-16T21:20:00Z");
+  const spax = await createRun({ type: "final", date: "2026-11-16", symbol: "SPAX" }, { root, fetcher, now });
+  expect(spax.symbol).toBe("SPAX");
+  expect((await readJson(path.join(root, "runs/last-attempt.json"), RunResultSchema)).symbol).toBe("SOXL");
+  expect((await readJson(path.join(root, "strategies/SPAX/runs/last-attempt.json"), RunResultSchema)).symbol).toBe("SPAX");
+  // A run stored before multi-ticker support has no symbol and reads as SOXL.
+  const legacy: Record<string, unknown> = { ...await readJson(path.join(root, "runs/last-attempt.json"), RunResultSchema) }; delete legacy.symbol;
+  expect(RunResultSchema.parse(legacy).symbol).toBe("SOXL");
 });

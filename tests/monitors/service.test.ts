@@ -35,12 +35,12 @@ it("rejects simultaneous writes, stale revisions and process locks without data 
 it("protects API auth, origin, strict schema, media type, size, symbols and session dates",async()=>{
  const s=await readObservations(root),cmd={revision:s.revision,observation};expect((await GET(new Request("https://monitor.example/api/monitors"))).status).toBe(401);
  expect((await PUT(request(cmd,{cookie:""}))).status).toBe(401);expect((await PUT(request(cmd,{origin:"https://evil.example"}))).status).toBe(403);expect((await PUT(request(cmd,{"content-type":"text/plain"}))).status).toBe(415);
- for(const patch of [{date:"2026-11-15"},{date:"2099-01-01"},{symbol:"SOXL"},{expiry:"2026-11-21"},{ask:.1},{delta:-2}])expect((await PUT(request({...cmd,observation:{...observation,...patch}}))).status).toBe(400);
+ for(const patch of [{date:"2026-11-15"},{date:"2099-01-01"},{symbol:"SOXX"},{expiry:"2026-11-21"},{ask:.1},{delta:-2}])expect((await PUT(request({...cmd,observation:{...observation,...patch}}))).status).toBe(400);
  expect((await PUT(request({...cmd,rogue:true}))).status).toBe(400);expect((await PUT(request({...cmd,padding:"x".repeat(20000)}))).status).toBe(400);
  expect((await PUT(request(cmd))).status).toBe(200);expect((await PUT(request(cmd))).status).toBe(409);expect((await GET(request(cmd))).status).toBe(200);
 });
 it("loads real seed reference history and honest missing SPAX data without asserting readiness",async()=>{
- const {results}=await loadMonitors({root,asOf:"2026-11-16"}),m=results[0]!;expect(m.reference).toBe("SPCX");expect(m.stats[1]!.count).toBe(98);expect(m.stats[0]!.count).toBe(0);expect(m.verdict).toBe("NOT READY");expect(m.dataStatus).toBe("unconfirmed");expect(m.facts.every(f=>!f.confirmed)).toBe(true);expect(m.expectedHistoryDate).toBe("2027-03-31");
+ const {results}=await loadMonitors({root,asOf:"2026-11-16"}),m=results.find(r=>r.symbol==="SPAX")!;expect(m.reference).toBe("SPCX");expect(m.stats[1]!.count).toBe(98);expect(m.stats[0]!.count).toBe(0);expect(m.verdict).toBe("NOT READY");expect(m.dataStatus).toBe("unconfirmed");expect(m.facts.every(f=>!f.confirmed)).toBe(true);expect(m.expectedHistoryDate).toBe("2027-03-31");
  // Independent pandas/numpy recomputation of bundled raw closes (ddof=1).
  expect(m.stats[1]!.price).toBe(134.72000122070312);expect(m.stats[1]!.sma50).toBeCloseTo(149.56140075683595,11);expect(m.stats[1]!.rv20).toBeCloseTo(.6378793381263164,12);expect(m.stats[1]!.drawdown).toBeCloseTo(-.36269453801180984,12);
 });
@@ -51,14 +51,14 @@ it("rejects identity mismatches and corrupt manual storage at the file boundary"
 it("requires matching final statuses and complete sessions, never extrapolates data freshness",async()=>{
  const b=BarsSchema.parse(JSON.parse(await readFile(path.join(root,"bars/SPCX.json"),"utf8")));await atomicWrite(path.join(root,"bars/SPAX.json"),BarsSchema,{...b,symbol:"SPAX"});
  const symbols=["SPAX","SPCX"].map(symbol=>({symbol,lastDate:"2026-10-30",expectedDate:"2026-10-30",count:b.bars.length,provisional:false,updated:true,issues:[]}));await atomicWrite(path.join(root,"updates/latest.json"),UpdateStatusSchema,{timestamp:"2026-11-16T22:00:00Z",asOf:"2026-10-30",symbols});
- expect((await loadMonitors({root,asOf:"2026-10-30"})).results[0]!.dataStatus).toBe("valid");
- expect((await loadMonitors({root,asOf:"2026-10-30",preview:true})).results[0]!.dataStatus).toBe("provisional");
+ expect((await loadMonitors({root,asOf:"2026-10-30"})).results.find(r=>r.symbol==="SPAX")!.dataStatus).toBe("valid");
+ expect((await loadMonitors({root,asOf:"2026-10-30",preview:true})).results.find(r=>r.symbol==="SPAX")!.dataStatus).toBe("provisional");
  const missing={...b,symbol:"SPAX",bars:b.bars.filter((_,i)=>i!==50)};await atomicWrite(path.join(root,"bars/SPAX.json"),BarsSchema,missing);symbols[0]!.count--;await atomicWrite(path.join(root,"updates/latest.json"),UpdateStatusSchema,{timestamp:"2026-11-16T22:00:00Z",asOf:"2026-10-30",symbols});
- const m=(await loadMonitors({root,asOf:"2026-10-30"})).results[0]!;expect(m.dataStatus).toBe("unconfirmed");expect(m.warnings.join(" ")).toContain("missing NYSE sessions");
+ const m=(await loadMonitors({root,asOf:"2026-10-30"})).results.find(r=>r.symbol==="SPAX")!;expect(m.dataStatus).toBe("unconfirmed");expect(m.warnings.join(" ")).toContain("missing NYSE sessions");
 });
 
 it("attaches validated monitor results and numeric workings to preview/final run JSON",async()=>{
- const run=RunResultSchema.parse(JSON.parse(await readFile("tests/fixtures/market/blocked-run.json","utf8"))),monitor=(await loadMonitors({root,asOf:"2026-11-16"})).results[0]!;
+ const run=RunResultSchema.parse(JSON.parse(await readFile("tests/fixtures/market/blocked-run.json","utf8"))),monitor=(await loadMonitors({root,asOf:"2026-11-16"})).results.find(r=>r.symbol==="SPAX")!;
  const result=attachMonitor(run,monitor);expect(result.spax.monitor?.checks).toHaveLength(6);expect(result.working["spax.monitor.stats.1.count"]!.result).toBe(98);expect(result.spax.monitor?.verdict).toBe("NOT READY");
 });
 it("uses configured identity terms for future monitors and rejects a wrong ETF identity",async()=>{

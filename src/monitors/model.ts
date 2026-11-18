@@ -53,7 +53,8 @@ export function buildMonitor(input:{config:MonitorConfig;reference:string;levera
   const noListedOptions=input.facts.some(f=>f.key==="listedOptions"&&f.confirmed&&f.value===false);
   const optionsPass=optionsKnown&&!noListedOptions&&(observation.cadence==="weekly"||observation.cadence==="biweekly")&&spreadRatio!==null&&spreadRatio<=c.maxSpread+1e-12&&observation.openInterest!>=c.minOpenInterest&&Math.abs(Math.abs(observation.delta!)-c.targetDelta)<=c.deltaTolerance+1e-12&&observation.expiry!>asOf;
   const unlocks=c.unlocks.map(e=>unlockWindow(e,r,asOf,c.postUnlockSessions));
-  const knownUnlocks=unlocks.length>0&&unlocks.every(u=>u.confirmed),digested=knownUnlocks&&unlocks.every(u=>u.return20!==null&&u.vol20!==null);
+  // No configured unlock events (e.g. a mature ETF like SOXL): nothing to digest.
+  const noUnlocks=c.unlocks.length===0,knownUnlocks=unlocks.length>0&&unlocks.every(u=>u.confirmed),digested=noUnlocks||knownUnlocks&&unlocks.every(u=>u.return20!==null&&u.vol20!==null);
   const trendKnown=refLast?.smaSlow!=null&&refLast.smaFast!==null;
   const checks: MonitorResult["checks"]=[
     {id:"history",status:ref.length>=c.historySessions?"pass":"fail",value:ref.length,detail:`${reference} ${ref.length}/${c.historySessions} stored sessions · ${c.symbol} ${asset.length}`},
@@ -61,7 +62,7 @@ export function buildMonitor(input:{config:MonitorConfig;reference:string;levera
     {id:"vol",status:ratio===null?"unconfirmed":ratio<c.volBrake?"pass":"fail",value:ratio,detail:`${c.symbol} RV10/RV60 < ${c.volBrake}; equality fails`},
     {id:"premium",status:ivRv===null?"unconfirmed":premiumStreak>=c.premiumSessions?"pass":"fail",value:premiumStreak,detail:`Manual IV/RV${c.rvWindow} ≥ ${c.premiumRatio} for ${c.premiumSessions} consecutive NYSE sessions`},
     {id:"options",status:noListedOptions||observation?.cadence==="none"?"fail":!optionsKnown?"unconfirmed":optionsPass?"pass":"fail",value:spreadRatio,detail:`Weekly/biweekly · spread ≤ ${(c.maxSpread*100).toFixed(0)}% · OI ≥ ${c.minOpenInterest} · |Δ| ${c.targetDelta} ± ${c.deltaTolerance}`},
-    {id:"unlocks",status:digested?"pass":knownUnlocks?"fail":"unconfirmed",value:unlocks.filter(u=>u.confirmed&&u.return20!==null).length,detail:`Actual dates need sourced confirmation; then ${c.postUnlockSessions} complete post-event sessions`},
+    {id:"unlocks",status:digested?"pass":knownUnlocks?"fail":"unconfirmed",value:unlocks.filter(u=>u.confirmed&&u.return20!==null).length,detail:noUnlocks?"No unlock events configured for this instrument":`Actual dates need sourced confirmation; then ${c.postUnlockSessions} complete post-event sessions`},
   ];
   const identity=input.facts.find(f=>f.key==="yahooSymbol")?.confirmed===true;
   const prerequisites=ref.length>=c.historySessions&&input.dataStatus==="valid"&&identity;

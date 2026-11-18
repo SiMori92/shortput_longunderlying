@@ -56,7 +56,7 @@ try {
   console.info("PASS: Railway startup refuses a missing persistent-volume configuration");
   await start(false);
   const health=await fetch(`${base}/api/health`); assert.equal(health.status,200); HealthSchema.parse(await health.json());
-  for(const url of ["/","/gate","/puts","/portfolio","/spax","/backtest","/rules"]) {
+  for(const url of ["/","/gate","/puts","/portfolio","/monitor","/backtest","/rules"]) {
     const response=await fetch(base+url,{redirect:"manual"}); assert.equal(response.status,307); assert(response.headers.get("location")?.endsWith("/login"));
   }
   const loginPage=await (await fetch(`${base}/login`)).text(); assert(loginPage.includes("Setup required"));
@@ -80,12 +80,18 @@ try {
   state = PortfolioStateSchema.parse(await (await fetch(`${base}/api/portfolio`,{headers:authorized})).json()); assert.deepEqual(state.entries,[entry]);
   assert.equal((await fetch(`${base}/api/auth/login`,{method:"POST",headers,body:JSON.stringify({...input,password:"wrong-password-value"})})).status,401);
   let html="";
-  for (const [url,title] of [["/","Today"],["/gate","Gate"],["/puts","Puts"],["/portfolio","Portfolio"],["/spax","SPAX monitor"],["/backtest","Backtest"],["/rules","Rules"]]) {
+  for (const [url,title] of [["/","Today"],["/gate","Gate"],["/puts","Puts"],["/portfolio","Portfolio"],["/monitor","SOXL monitor"],["/backtest","Backtest"],["/rules","Rules"]]) {
     const response=await fetch(base+url,{headers:authorized,redirect:"manual"}); assert.equal(response.status,200); assert.equal(response.headers.get("cache-control"),"no-store");
     html=await response.text();
     const heading=html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1]?.replace(/<!--[\s\S]*?-->/g,"").replace(/<[^>]*>/g,"");
     assert(heading?.includes(title!),`Missing page heading: ${url}`);
   }
+  // The ticker cookie switches every page to SPAX; its gate stays honest about short history.
+  for (const [url,text] of [["/","V3.1 · SPAX vs SPCX"],["/monitor","SPAX monitor"],["/backtest","Not enough SPAX history"],["/portfolio","ENTERED ACCOUNT · SPAX"]]) {
+    const response=await fetch(base+url,{headers:{...authorized,cookie:`${cookie}; strategy_symbol=SPAX`},redirect:"manual"}); assert.equal(response.status,200,`SPAX ${url}`);
+    assert((await response.text()).replace(/<!-- -->/g,"").includes(text!),`SPAX ${url} missing ${text}`);
+  }
+  assert.equal((await fetch(`${base}/spax`,{headers:authorized,redirect:"manual"})).status,307);
   const asset=html.match(/src="([^"\s]*\/_next\/static\/[^"\s]+)"/)?.[1]; assert(asset,"Missing browser JS asset");
   assert.equal((await fetch(new URL(asset,base))).status,200);
   assert.equal((await fetch(`${base}/api/auth/logout`,{method:"POST",headers:authorized})).status,200);
@@ -96,6 +102,7 @@ try {
   console.info("PASS: configured HTTPS origin works through simulated proxy headers; cross-site writes return 403");
   console.info("PASS: restart preserves bars, API-entered snapshot, signed session; wrong password still rejected");
   console.info("PASS: all seven authenticated pages render expected content; browser JS asset is served");
+  console.info("PASS: ticker cookie switches Today/Monitor/Backtest/Portfolio to SPAX; /spax redirects to /monitor");
   console.info("PASS: logout endpoint works and unsigned API access remains blocked");
   console.info("LIMITATION: simulated Railway environment on local Node; actual Docker, Railway volume permissions, TLS and remote service settings are unverified");
 } catch(error) { console.error(log.slice(-4000)); throw error; }

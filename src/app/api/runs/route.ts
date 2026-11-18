@@ -5,15 +5,18 @@ import { PortfolioEntriesSchema } from "@/schemas/portfolio";
 import { dataRoot, readJson } from "@/data/store";
 import { createRun, readOptionalRun, RunBusyError, InvalidRunInputError } from "@/runs/service";
 import { RunErrorSchema, RunInputSchema, RunResultSchema } from "@/schemas/run";
+import { requestStrategy } from "@/strategy/symbols";
+import { strategyRoot } from "@/strategy/paths";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "no-store" };
 function error(code: Parameters<typeof RunErrorSchema.parse>[0], status: number) { return Response.json(RunErrorSchema.parse(code), { status, headers }); }
 export async function GET(request: Request) {
   if (!authenticated(request)) return error({ error: "unauthorized", message: "Authenticated signed-in session required. Sign in to continue." }, 401);
   try {
-    const run = await readOptionalRun(path.join(dataRoot(), "runs/last-attempt.json"));
+    const dir = strategyRoot(dataRoot(), requestStrategy(request));
+    const run = await readOptionalRun(path.join(dir, "runs/last-attempt.json"));
     if (!run) return error({ error: "run-failed", message: "No run available" }, 404);
-    const snapshots = await readJson(path.join(dataRoot(), "portfolio/entries.json"), PortfolioEntriesSchema);
+    const snapshots = await readJson(path.join(dir, "portfolio/entries.json"), PortfolioEntriesSchema);
     return Response.json(RunResultSchema.parse(currentAccountRun(run, snapshots)), { headers });
   } catch (e) { console.error("[runs] Read failed", e); return error({ error: "run-failed", message: "Stored run failed validation" }, 503); }
 }

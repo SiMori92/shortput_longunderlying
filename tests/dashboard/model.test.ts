@@ -43,7 +43,7 @@ it("rejects absent, blocked, accountless and stale actions", async () => {
   expect(actionsAvailable(ready, "2026-11-18")).toBe(false);
   expect(actionsAvailable({ ...ready, account: null }, "2026-11-17")).toBe(false);
 });
-const snapshot = { date: row.date, accountValue: 100000, shares: 100, openPuts: [{ id: "test", symbol: "SOXL", opened: "2026-11-09", strike: 40, expiry: "2026-11-20", contracts: 2, credit: 2 }] };
+const snapshot = { date: row.date, accountValue: 100000, shares: 100, openPuts: [{ id: "test", symbol: "SOXL" as const, opened: "2026-11-09", strike: 40, expiry: "2026-11-20", contracts: 2, credit: 2 }] };
 it("marks manual puts with model capture, strike distance and costs", () => {
   const p = markPuts(snapshot, row, rules)[0]!;
   expect(p.contracts).toBe(2); expect(p.captured).toBe(1 - p.value / 2);

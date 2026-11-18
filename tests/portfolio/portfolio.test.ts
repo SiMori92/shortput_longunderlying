@@ -57,7 +57,7 @@ it("API enforces authentication, origin, media type, size, dates and strict sche
   expect((await PUT(request(cmd))).status).toBe(409);
 });
 it("validates put identities, symbols, opening dates and whole sizing", () => {
-  const put = { id:"p",symbol:"SOXL",opened:entry.date,expiry:"2026-11-20",strike:40,contracts:1,credit:2 };
+  const put = { id:"p",symbol:"SOXL" as const,opened:entry.date,expiry:"2026-11-20",strike:40,contracts:1,credit:2 };
   for (const p of [{...put,contracts:1.5},{...put,credit:-1},{...put,symbol:"NVDL"},{...put,opened:"2026-11-17"},{...put,expiry:"2026-11-10"}]) expect(PortfolioEntrySchema.safeParse({...entry,openPuts:[p]}).success).toBe(false);
   expect(PortfolioEntrySchema.safeParse({...entry,openPuts:[put,put]}).success).toBe(false);
   expect(PortfolioCommandSchema.safeParse({operation:"journal",revision:"0".repeat(64),date:entry.date,done:" ",note:""}).success).toBe(false);
@@ -77,7 +77,7 @@ it("journal requires a snapshot and freezes server-owned advice; blocked advice 
   expect(recommendation({...run,freshness:{...run.freshness,actionsBlocked:true}},entry.date).runId).toBe("unconfirmed");
 });
 it("flags quantity changes, modified or removed puts and missing prior finals", () => {
-  const p={id:"p",symbol:"SOXL",opened:"2026-11-13",expiry:"2026-11-20",strike:40,contracts:1,credit:2};
+  const p={id:"p",symbol:"SOXL" as const,opened:"2026-11-13",expiry:"2026-11-20",strike:40,contracts:1,credit:2};
   const previous={...entry,date:"2026-11-13",openPuts:[p]};
   expect(consistency({...entry,shares:100},previous,null).join(" ")).toMatch(/shares 100.*removed.*unconfirmed/);
   expect(consistency({...entry,openPuts:[{...p,contracts:2}]},previous,null).join(" ")).toContain("changed");

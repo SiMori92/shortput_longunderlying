@@ -2,13 +2,15 @@ import { MonitorResultSchema } from "./monitor";
 import { z } from "zod";
 import { DateSchema, NumberSchema, PositiveSchema, StateSchema, WorkingSchema } from "./common";
 import { DataIssueSchema, SymbolStatusSchema } from "./market";
-export const RunInputSchema = z.strictObject({ type: z.enum(["preview", "final", "catchup"]), date: DateSchema.optional() });
+import { StrategySymbolSchema } from "../strategy/symbols";
+export const RunInputSchema = z.strictObject({ type: z.enum(["preview", "final", "catchup"]), date: DateSchema.optional(), symbol: StrategySymbolSchema.optional() });
 const condition = z.strictObject({ value: NumberSchema, threshold: NumberSchema, distance: NumberSchema, passes: z.boolean(), closeCall: z.boolean() });
 const action = z.strictObject({ kind: z.enum(["core", "sell-put", "buy-back", "expiry"]), description: z.string(), modelQuantity: NumberSchema, roundedQuantity: z.number().int(), modelPrice: NumberSchema.nullable() });
 const limit = z.strictObject({ name: z.enum(["weekly", "total", "gap"]), modelQuantity: NumberSchema.nonnegative().nullable(), binds: z.boolean() });
 const check = z.strictObject({ id: z.enum(["history", "trend", "vol", "premium", "options", "unlocks"]), status: z.enum(["pass", "fail", "unconfirmed", "provisional"]), value: z.union([NumberSchema, z.string(), z.null()]) });
 export const RunResultSchema = z.strictObject({
-  schemaVersion: z.literal(1), id: z.string(), type: RunInputSchema.shape.type, timestamp: z.iso.datetime(), asOf: DateSchema, rulesId: z.literal("v3_1"),
+  // Runs stored before multi-ticker support are SOXL runs.
+  schemaVersion: z.literal(1), symbol: StrategySymbolSchema.default("SOXL"), id: z.string(), type: RunInputSchema.shape.type, timestamp: z.iso.datetime(), asOf: DateSchema, rulesId: z.literal("v3_1"),
   freshness: z.strictObject({ status: z.enum(["valid", "provisional", "blocked"]), issues: z.array(DataIssueSchema), symbols: z.array(SymbolStatusSchema), actionsBlocked: z.boolean() }),
   gate: z.strictObject({ a: condition, b: condition, c: condition, state: StateSchema, gateOn: z.boolean(), multiplier: NumberSchema, putOk: z.boolean() }).nullable(),
   core: z.strictObject({ price: PositiveSchema, rvFast: NumberSchema.nonnegative(), previousEquity: PositiveSchema, targetWeight: NumberSchema, modelShares: NumberSchema, roundedShares: z.number().int(), bandValue: NumberSchema, timing: z.literal("next-close-estimate"), trade: action.nullable() }).nullable(),
