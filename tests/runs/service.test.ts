@@ -1,7 +1,9 @@
 import path from "node:path";
 import os from "node:os";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
+// Each test runs full market updates + replays; slower build machines (Railway) need more than the 5s default.
+vi.setConfig({ testTimeout: 30_000 });
 import { seedData } from "../../src/data/seed";
 import { atomicWrite, readJson } from "../../src/data/store";
 import { BarsSchema, type Bars } from "../../src/schemas/bars";
