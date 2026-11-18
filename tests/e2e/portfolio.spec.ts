@@ -63,7 +63,7 @@ test("authorized portfolio entry, puts, persisted journal and four responsive wi
 });
 test("edit snapshot in history opens that date in the editor", async ({ page, context }) => {
   await context.setExtraHTTPHeaders({ Cookie: cookie() });
-  for (const [date, nav] of [["2026-11-16","100000"],["2026-11-17","90000"]]) {
+  for (const [date, nav] of [["2026-11-16","100000"],["2026-11-17","90000"]] as const) {
     await page.goto(`/portfolio?date=${date}`);
     await page.getByLabel("Account value ($)",{exact:true}).fill(nav);
     await page.getByRole("button",{name:"Save snapshot",exact:true}).click();
