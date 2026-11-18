@@ -25,8 +25,8 @@ async function main() {
   if (!stdin.isTTY || !stdout.isTTY) throw new Error("Run auth:setup in an interactive terminal; credentials are never accepted as arguments.");
   const username = (await prompt("Account name (3-64 chars: letters, digits, . _ @ -): ")).trim();
   if (!/^[A-Za-z0-9._@-]{3,64}$/.test(username)) throw new Error("Account name must be 3-64 characters: letters, digits, . _ @ -");
-  const password = await prompt("New password (14+ characters; max 72 UTF-8 bytes): ", true);
-  if (password.length < 14 || Buffer.byteLength(password) > 72) throw new Error("Password must have at least 14 characters and at most 72 UTF-8 bytes.");
+  const password = await prompt("New password (8+ characters; max 72 UTF-8 bytes): ", true);
+  if (password.length < 8 || Buffer.byteLength(password) > 72) throw new Error("Password must have at least 8 characters and at most 72 UTF-8 bytes.");
   if (password !== await prompt("Confirm password: ", true)) throw new Error("Passwords differ");
   const origin = await prompt("App origin (https://your-host, or http://127.0.0.1:3000 locally): ");
   const config = AuthConfigSchema.parse({ AUTH_USERNAME: username, AUTH_PASSWORD_HASH: await hash(password, 12), SESSION_SECRET: randomBytes(48).toString("hex"), APP_ORIGIN: origin });

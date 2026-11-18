@@ -36,7 +36,7 @@ pnpm install --frozen-lockfile
 pnpm auth:setup
 ```
 
-Enter an account name (3-64 characters: letters, digits, `. _ @ -`; case-sensitive), choose a password of 14+ characters, confirm it, and enter the exact HTTPS Railway domain with no trailing slash. The command saves `.env.local` with permissions 0600. It refuses to overwrite an existing file; delete the old `.env.local` first if you are deliberately replacing credentials.
+Enter an account name (3-64 characters: letters, digits, `. _ @ -`; case-sensitive), choose a password of 8+ characters, confirm it, and enter the exact HTTPS Railway domain with no trailing slash. The command saves `.env.local` with permissions 0600. It refuses to overwrite an existing file; delete the old `.env.local` first if you are deliberately replacing credentials.
 
 In Railway **Variables**, add the four generated values from `.env.local`:
 

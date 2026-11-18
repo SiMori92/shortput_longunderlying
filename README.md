@@ -200,7 +200,7 @@ M7 uses the existing CSS/Recharts/Zod stack; no new dependencies or engine chang
 pnpm auth:setup
 ```
 
-Run this in an interactive local terminal. Enter an account name (3-64 characters: letters, digits, `. _ @ -`; case-sensitive). Password and confirmation input are hidden; use 14+ characters and at most 72 UTF-8 bytes (bcrypt's input limit). Enter the exact browser origin, without a trailing slash: `http://127.0.0.1:3000` locally or `https://your-domain` on the VPS. The command exclusively creates `.env.local` with permissions 0600. It never prints passwords or secrets. `.env.local` is ignored by Git and Docker. Existing files are never overwritten.
+Run this in an interactive local terminal. Enter an account name (3-64 characters: letters, digits, `. _ @ -`; case-sensitive). Password and confirmation input are hidden; use 8+ characters and at most 72 UTF-8 bytes (bcrypt's input limit). Enter the exact browser origin, without a trailing slash: `http://127.0.0.1:3000` locally or `https://your-domain` on the VPS. The command exclusively creates `.env.local` with permissions 0600. It never prints passwords or secrets. `.env.local` is ignored by Git and Docker. Existing files are never overwritten.
 
 Restart after setup or changes to environment variables. Production host operation is:
 
