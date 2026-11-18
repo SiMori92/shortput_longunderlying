@@ -1,0 +1,40 @@
+{
+  "id": "v3_archived",
+  "version": "V3",
+  "archived": true,
+  "gateMode": "all-conditions",
+  "smaFast": 50,
+  "smaSlow": 200,
+  "rvSpike": 1.6,
+  "riskCutMultiplier": 1,
+  "coreVolTarget": 0.35,
+  "coreCap": 0.3,
+  "coreBand": 0.25,
+  "targetDelta": 0.2,
+  "tenorWeeks": 2,
+  "entryLastWeekday": 2,
+  "notionalPerWeek": 0.175,
+  "maxPutNotional": 0.35,
+  "profitTake": 0.7,
+  "gapBudget": 0.1,
+  "gapSize": 0.3,
+  "ivPremium": 1.05,
+  "ivMin": 0.3,
+  "ivMax": 3.0,
+  "skew": 0.5,
+  "premiumSlippage": 0.05,
+  "commission": 0.65,
+  "stockSlippage": 0.0005,
+  "marginSpread": 0.015,
+  "killDrawdown": -0.25,
+  "splits": [
+    {
+      "date": "2015-05-20",
+      "factor": 4
+    },
+    {
+      "date": "2021-03-02",
+      "factor": 15
+    }
+  ]
+}

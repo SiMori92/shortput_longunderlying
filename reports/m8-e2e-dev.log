@@ -1,0 +1,57 @@
+
+> strategy-monitor@0.1.0 test:e2e /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> playwright test
+
+[WebServer] (node:27817) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:27828) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:27834) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 5 workers
+
+(node:27840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27837) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27839) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27841) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27838) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:27923) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 tests/e2e/portfolio.spec.ts:14:1 › authorized portfolio is editable; independent unsigned API requests fail closed (5.7s)
+  ✓   1 tests/e2e/auth.spec.ts:6:1 › anonymous pages, RSC and APIs are private; health and login are public (5.8s)
+  ✓   3 tests/e2e/monitor.spec.ts:12:1 › fresh install shows six checks, unconfirmed facts and missing SPAX without a fabricated chart (6.1s)
+  ✓   4 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 360px (7.2s)
+  ✓   2 tests/e2e/shell.spec.ts:10:3 › Today dashboard 360px (7.7s)
+  ✓   9 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 360px (4.8s)
+  ✓  10 tests/e2e/shell.spec.ts:33:3 › Gate dashboard 360px (5.1s)
+  ✓   7 tests/e2e/auth.spec.ts:16:1 › password/TOTP login, secure browser cookie, logout and replay protection (9.7s)
+  ✓  11 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 768px (5.1s)
+  ✓  13 tests/e2e/auth.spec.ts:27:1 › rate limit returns cooldown and cannot be bypassed with an IP header (2.5s)
+  ✓  14 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 768px (1.6s)
+  ✓  15 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1024px (3.5s)
+  ✓   6 tests/e2e/portfolio.spec.ts:20:1 › authorized portfolio entry, puts, persisted journal and four responsive widths (16.9s)
+  ✓  16 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1024px (990ms)
+  ✓   8 tests/e2e/monitor.spec.ts:16:1 › manual IV and quotes persist, charts work, invalid spread is rejected, four widths fit (17.3s)
+  ✓  17 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1440px (3.5s)
+  ✓  12 tests/e2e/shell.spec.ts:50:3 › Puts dashboard 360px (14.0s)
+  ✓  18 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1440px (802ms)
+  ✓  19 tests/e2e/shell.spec.ts:10:3 › Today dashboard 768px (1.0s)
+  ✓  20 tests/e2e/shell.spec.ts:33:3 › Gate dashboard 768px (1.2s)
+  ✓  21 tests/e2e/shell.spec.ts:50:3 › Puts dashboard 768px (4.0s)
+  ✓  22 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1024px (904ms)
+  ✓  23 tests/e2e/shell.spec.ts:33:3 › Gate dashboard 1024px (1.2s)
+  ✓  24 tests/e2e/shell.spec.ts:50:3 › Puts dashboard 1024px (4.2s)
+  ✓  25 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1440px (987ms)
+  ✓  26 tests/e2e/shell.spec.ts:33:3 › Gate dashboard 1440px (1.2s)
+  ✓  27 tests/e2e/shell.spec.ts:50:3 › Puts dashboard 1440px (4.0s)
+  ✓  28 tests/e2e/shell.spec.ts:67:1 › health is schema-safe and strategy is not ready (36ms)
+  ✓  29 tests/e2e/shell.spec.ts:71:1 › gate tooltip responds to a phone tap (879ms)
+  ✓  30 tests/e2e/shell.spec.ts:83:1 › working disclosures stay within a 360px viewport and close with Escape (3.5s)
+
+  30 passed (53.8s)

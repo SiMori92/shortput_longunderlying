@@ -1,0 +1,15 @@
+short_put_engine.py UNCHANGED 39affbe76212a965d65e25a7ab3fdba2ec58e45766cfda7c263a0189f9af33c9
+risk_v3.py UNCHANGED ed77a0f696018918b775a24528dfb2d1910991b4501287e5b191159310147d9e
+riskcut_v3.py UNCHANGED c0836f504e67be1037740f922e425aa2a0d7b2749d1906f7cf77966bfb73d010
+Original and bundled SOXL.csv UNCHANGED
+Original and bundled SOXX.csv UNCHANGED
+Original and bundled SPCX.csv UNCHANGED
+Original and bundled SPY.csv UNCHANGED
+Original and bundled ^IRX.csv UNCHANGED
+Original and bundled ^VIX.csv UNCHANGED
+Actual data/portfolio/entries.json remains empty
+Actual data/portfolio/journal.json remains empty
+Actual data/monitors/observations.json remains empty
+No owner .env.local created
+Docker executable: None
+Railway CLI status: expired OAuth authentication; no linked project (read-only check)

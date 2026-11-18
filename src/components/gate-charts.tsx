@@ -1,0 +1,24 @@
+"use client";
+import { useState, useSyncExternalStore } from "react";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ReferenceArea } from "recharts";
+import type { GatePoint } from "@/dashboard/model";
+import { Working } from "./working";
+const colors: Record<string, string> = { ON: "#77f9a9", "RISK CUT": "#f5c76b", OFF: "#b1becd" };
+const subscribe = () => () => {};
+const tooltip = { background: "#13291f", border: "1px solid #47785f", borderRadius: 10, color: "#e6f2ec", fontSize: 12 };
+export function Sparkline({ values, label }: { values: number[]; label: string }) {
+  if (!values.length) return null;
+  const min = Math.min(...values), range = Math.max(...values) - min || 1;
+  return <svg className="sparkline" viewBox="0 0 280 48" role="img" aria-label={`${label}; last ${values.length} stored sessions`} preserveAspectRatio="none"><polyline fill="none" stroke="currentColor" strokeWidth="2" points={values.map((v, i) => `${i / Math.max(1, values.length - 1) * 280},${44 - (v - min) / range * 38}`).join(" ")} /></svg>;
+}
+export function GateCharts({ points, threshold }: { points: GatePoint[]; threshold: number }) {
+  const [years, setYears] = useState(1);
+  const hydrated = useSyncExternalStore(subscribe, () => true, () => false);
+  const end = points.at(-1)?.date ?? "", start = `${Number(end.slice(0, 4)) - years}${end.slice(4)}`;
+  const data = points.filter(p => p.date >= start);
+  const bands: { start: string; end: string; state: string }[] = [];
+  data.forEach((p, i) => { const last = bands.at(-1); if (last?.state === p.state) last.end = p.date; else { if (last) last.end = p.date; bands.push({ start: p.date, end: data[i + 1]?.date ?? p.date, state: p.state }); } });
+  const axis = { stroke: "#9cbdad", fontSize: 10, tickLine: false, axisLine: false };
+  return <><section className="card chart-card" data-ready={hydrated}><div className="section-heading"><h2>SOXX trend <Working label="SOXX trend chart" formula="SOXX close; rolling arithmetic means after feature warm-up" inputs="Price and SMA are stored-history model context; hover, tap or use arrow keys for exact values" /></h2><div className="segmented" aria-label="Chart period">{[1, 5].map(y => <button key={y} disabled={!hydrated} aria-pressed={years === y} onClick={() => setYears(y)}>{y}Y</button>)}</div></div><div className="chart-legend"><span>● SOXX</span><span className="legend-fast">● SMA50</span><span className="legend-slow">● SMA200</span></div><div className="chart-frame" aria-label="SOXX price and moving averages"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 12, right: 8, bottom: 8, left: -20 }} accessibilityLayer><CartesianGrid stroke="#1e3a2e" vertical={false} /><XAxis dataKey="date" {...axis} minTickGap={55} tickFormatter={v => String(v).slice(2, 7)} /><YAxis {...axis} domain={["auto", "auto"]} /><Tooltip trigger="click" isAnimationActive={false} contentStyle={tooltip} formatter={(v, name) => [typeof v === "number" ? v.toFixed(4) : v, name]} />{bands.map(b => <ReferenceArea key={b.start} x1={b.start} x2={b.end} fill={colors[b.state]} fillOpacity={.07} strokeOpacity={0} />)}<Line name="SOXX" dataKey="price" stroke="#77f9a9" dot={false} strokeWidth={2} isAnimationActive={false} /><Line name="SMA50" dataKey="fast" stroke="#f5c76b" dot={false} isAnimationActive={false} /><Line name="SMA200" dataKey="slow" stroke="#8fbfff" dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><div className="chart-legend">{Object.entries(colors).map(([state, color]) => <span key={state}><i style={{ background: color }} />{state}</span>)}</div></section>
+    <section className="card chart-card" data-ready={hydrated}><div className="section-heading"><h2>Volatility brake <Working label="Volatility ratio chart" formula="RV10 / RV60; RVn = sample std(log returns, n) × √252" inputs={`Fail above ${threshold}; equality passes`} /></h2><span className="chip">RV10 / RV60</span></div><div className="chart-frame short" aria-label="Realized volatility ratio"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 18, right: 12, bottom: 8, left: -20 }} accessibilityLayer><CartesianGrid stroke="#1e3a2e" vertical={false} /><XAxis dataKey="date" {...axis} minTickGap={55} tickFormatter={v => String(v).slice(2, 7)} /><YAxis {...axis} domain={[0, "auto"]} /><Tooltip trigger="click" isAnimationActive={false} contentStyle={tooltip} formatter={v => typeof v === "number" ? v.toFixed(6) : v} /><ReferenceLine y={threshold} stroke="#f5c76b" strokeDasharray="5 5" label={{ value: `Brake ${threshold}`, fill: "#f5c76b", fontSize: 11, position: "insideTopRight" }} /><Line name="RV10 / RV60" dataKey="ratio" stroke="#77f9a9" strokeWidth={2} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div></section></>;
+}

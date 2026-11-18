@@ -1,0 +1,13 @@
+short_put_engine.py UNCHANGED 39affbe76212a965d65e25a7ab3fdba2ec58e45766cfda7c263a0189f9af33c9
+risk_v3.py UNCHANGED ed77a0f696018918b775a24528dfb2d1910991b4501287e5b191159310147d9e
+riskcut_v3.py UNCHANGED c0836f504e67be1037740f922e425aa2a0d7b2749d1906f7cf77966bfb73d010
+seed/SOXL.csv and original CSV UNCHANGED
+seed/SOXX.csv and original CSV UNCHANGED
+seed/SPCX.csv and original CSV UNCHANGED
+seed/SPY.csv and original CSV UNCHANGED
+seed/^IRX.csv and original CSV UNCHANGED
+seed/^VIX.csv and original CSV UNCHANGED
+data/portfolio/entries.json: empty; no real records entered
+data/portfolio/journal.json: empty; no real records entered
+data/monitors/observations.json: empty; no real records entered
+No owner .env.local created

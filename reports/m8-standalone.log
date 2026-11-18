@@ -1,0 +1,6 @@
+PASS: standalone package contains no runtime data, env, enrollment, test or report files
+PASS: isolated production startup seeds an empty disk and registers the ET scheduler
+PASS: unconfigured server fails closed; password + TOTP issues a real session when configured
+PASS: restart preserves seeded bars, API-entered snapshot, signed session and TOTP replay state
+PASS: all seven authenticated production pages render HTTP 200
+LIMITATION: local Node smoke test; Docker/VPS/mobile-network acceptance remains unverified

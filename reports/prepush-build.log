@@ -1,0 +1,59 @@
+
+> strategy-monitor@0.1.0 build /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> pnpm test && next build && tsx tools/package-standalone.ts
+
+
+> strategy-monitor@0.1.0 test /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> vitest run
+
+
+ RUN  v4.1.12 /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+
+
+ Test Files  21 passed (21)
+      Tests  130 passed (130)
+   Start at  17:43:19
+   Duration  9.20s (transform 1.85s, setup 0ms, import 5.86s, tests 25.23s, environment 3ms)
+
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config.ts took 52ms
+- Experiments (use with caution):
+  ⨯ turbopackFileSystemCacheForDev
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 866ms
+  Running TypeScript ...
+  Finished TypeScript in 1463ms ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/8) ...
+  Generating static pages using 9 workers (2/8) 
+  Generating static pages using 9 workers (4/8) 
+  Generating static pages using 9 workers (6/8) 
+✓ Generating static pages using 9 workers (8/8) in 85ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /[section]
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/health
+├ ƒ /api/monitors
+├ ƒ /api/portfolio
+├ ƒ /api/runs
+├ ƒ /backtest
+├ ƒ /gate
+├ ƒ /login
+├ ƒ /portfolio
+├ ƒ /puts
+├ ƒ /rules
+└ ƒ /spax
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[package] Standalone excludes runtime data, enrollment files, tests, reports and environment files

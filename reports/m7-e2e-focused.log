@@ -1,0 +1,23 @@
+[WebServer] (node:23407) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23417) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23423) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 8 tests using 1 worker
+
+(node:23434) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 360px (4.4s)
+  ✓  2 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 360px (858ms)
+  ✓  3 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 768px (3.2s)
+  ✓  4 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 768px (824ms)
+  ✓  5 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1024px (2.1s)
+  ✓  6 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1024px (580ms)
+  ✓  7 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1440px (2.3s)
+  ✓  8 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1440px (640ms)
+
+  8 passed (17.6s)

@@ -1,0 +1,13 @@
+
+> strategy-monitor@0.1.0 test /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> vitest run
+
+
+ RUN  v4.1.12 /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+
+
+ Test Files  20 passed (20)
+      Tests  124 passed (124)
+   Start at  17:20:57
+   Duration  7.16s (transform 1.28s, setup 0ms, import 3.86s, tests 19.81s, environment 2ms)
+

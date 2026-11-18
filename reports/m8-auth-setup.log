@@ -1,0 +1,7 @@
+PASS: interactive password confirmation (hidden input)
+PASS: generated QR decoded independently with Apple Vision
+PASS: real generated TOTP confirmed enrollment
+PASS: .env.local contains all four validated settings with 0600 permissions
+PASS: QR permissions 0600; setup directory 0700
+PASS: password, secret and confirmation code absent from terminal output
+PASS: test credentials confined to a temporary directory and removed

@@ -1,0 +1,30 @@
+
+> strategy-monitor@0.1.0 test:e2e /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> playwright test
+
+[WebServer] (node:3882) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:3894) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 15 tests using 1 worker
+
+(node:3914) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/shell.spec.ts:10:3 › Today dashboard 360px (896ms)
+  ✓   2 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 360px (567ms)
+  ✓   3 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 360px (1.2s)
+  ✓   4 tests/e2e/shell.spec.ts:10:3 › Today dashboard 768px (559ms)
+  ✓   5 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 768px (550ms)
+  ✓   6 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 768px (1.2s)
+  ✓   7 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1024px (528ms)
+  ✓   8 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 1024px (515ms)
+  ✓   9 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 1024px (1.2s)
+  ✓  10 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1440px (631ms)
+  ✓  11 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 1440px (535ms)
+  ✓  12 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 1440px (1.2s)
+  ✓  13 tests/e2e/shell.spec.ts:66:1 › health is schema-safe and strategy is not ready (27ms)
+  ✓  14 tests/e2e/shell.spec.ts:70:1 › gate tooltip responds to a phone tap (297ms)
+  ✓  15 tests/e2e/shell.spec.ts:82:1 › working disclosures stay within a 360px viewport and close with Escape (1.7s)
+
+  15 passed (13.3s)

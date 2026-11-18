@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  17:02:58
+   Duration  5.66s (transform 57ms, setup 0ms, import 107ms, tests 5.48s, environment 0ms)
+

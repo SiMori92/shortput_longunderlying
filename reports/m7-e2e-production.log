@@ -1,0 +1,48 @@
+
+> strategy-monitor@0.1.0 test:e2e /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> playwright test
+
+[WebServer] (node:24867) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:24878) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 4 workers
+
+(node:24898) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24900) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24901) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24899) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/e2e/portfolio.spec.ts:14:1 › portfolio is readable locally but saving fails closed without a session (3.2s)
+  ✓   3 tests/e2e/monitor.spec.ts:12:1 › fresh install shows six checks, unconfirmed facts and missing SPAX without a fabricated chart (3.4s)
+  ✓   4 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 360px (4.3s)
+  ✓   2 tests/e2e/shell.spec.ts:10:3 › Today dashboard 360px (4.9s)
+  ✓   7 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 360px (1.7s)
+  ✓   8 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 360px (1.3s)
+  ✓   9 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 768px (2.5s)
+  ✓  11 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 768px (639ms)
+  ✓   6 tests/e2e/monitor.spec.ts:16:1 › manual IV and quotes persist, charts work, invalid spread is rejected, four widths fit (8.7s)
+  ✓  12 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1024px (3.0s)
+  ✓   5 tests/e2e/portfolio.spec.ts:20:1 › authorized portfolio entry, puts, persisted journal and four responsive widths (9.7s)
+  ✓  13 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1024px (948ms)
+  ✓  10 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 360px (7.0s)
+  ✓  14 tests/e2e/backtest.spec.ts:8:2 › Backtest Python tables and charts 1440px (2.1s)
+  ✓  15 tests/e2e/shell.spec.ts:10:3 › Today dashboard 768px (2.2s)
+  ✓  16 tests/e2e/backtest.spec.ts:23:2 › Rules live and collapsed archive 1440px (518ms)
+  ✓  17 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 768px (760ms)
+  ✓  18 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 768px (1.3s)
+  ✓  19 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1024px (646ms)
+  ✓  20 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 1024px (573ms)
+  ✓  21 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 1024px (1.2s)
+  ✓  22 tests/e2e/shell.spec.ts:10:3 › Today dashboard 1440px (724ms)
+  ✓  23 tests/e2e/shell.spec.ts:32:3 › Gate dashboard 1440px (536ms)
+  ✓  24 tests/e2e/shell.spec.ts:49:3 › Puts dashboard 1440px (1.3s)
+  ✓  25 tests/e2e/shell.spec.ts:66:1 › health is schema-safe and strategy is not ready (31ms)
+  ✓  26 tests/e2e/shell.spec.ts:70:1 › gate tooltip responds to a phone tap (433ms)
+  ✓  27 tests/e2e/shell.spec.ts:82:1 › working disclosures stay within a 360px viewport and close with Escape (2.0s)
+
+  27 passed (27.0s)

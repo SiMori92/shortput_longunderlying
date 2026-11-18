@@ -1,0 +1,13 @@
+
+> strategy-monitor@0.1.0 smoke /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> tsx tools/smoke-production.ts
+
+PASS: Railway startup refuses a missing persistent-volume configuration
+PASS: standalone package excludes runtime data, env, enrollment, tests and reports
+PASS: dynamic PORT + 0.0.0.0 startup seeds an empty volume directory and registers the ET scheduler
+PASS: unsigned pages/APIs stay private; password + TOTP issues a Secure/HttpOnly/SameSite cookie
+PASS: configured HTTPS origin works through simulated proxy headers; cross-site writes return 403
+PASS: restart preserves bars, API-entered snapshot, signed session and TOTP replay state
+PASS: all seven authenticated pages render expected content; browser JS asset is served
+PASS: logout endpoint works and unsigned API access remains blocked
+LIMITATION: simulated Railway environment on local Node; actual Docker, Railway volume permissions, TLS and remote service settings are unverified

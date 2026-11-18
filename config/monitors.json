@@ -1,0 +1,41 @@
+[
+  {
+    "symbol": "SPAX",
+    "identityTerms": [
+      "2X",
+      "SPCX"
+    ],
+    "historySessions": 200,
+    "smaFast": 50,
+    "smaSlow": 200,
+    "rvWindow": 20,
+    "volBrake": 1.6,
+    "premiumRatio": 1.1,
+    "premiumSessions": 20,
+    "maxSpread": 0.1,
+    "minOpenInterest": 500,
+    "targetDelta": 0.2,
+    "deltaTolerance": 0.05,
+    "postUnlockSessions": 20,
+    "ipoPrice": 135,
+    "ipoSource": "User brief: SPCX IPO price; unverified",
+    "unlocks": [
+      {
+        "id": "first",
+        "label": "Initial pool \u00b7 approximate",
+        "scheduled": "2026-12-08",
+        "fraction": 0.059,
+        "confirmedDate": null,
+        "source": null
+      },
+      {
+        "id": "founder",
+        "label": "Founder pool \u00b7 approximate",
+        "scheduled": "2027-06-12",
+        "fraction": 0.47,
+        "confirmedDate": null,
+        "source": null
+      }
+    ]
+  }
+]

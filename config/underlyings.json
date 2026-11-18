@@ -1,0 +1,60 @@
+[
+  {
+    "symbol": "SOXL",
+    "role": "trade",
+    "leverage": 3,
+    "reference": "SOXX",
+    "seedFile": "SOXL.csv"
+  },
+  {
+    "symbol": "SOXX",
+    "role": "reference",
+    "leverage": 1,
+    "reference": null,
+    "seedFile": "SOXX.csv"
+  },
+  {
+    "symbol": "SPY",
+    "role": "input",
+    "leverage": 1,
+    "reference": null,
+    "seedFile": "SPY.csv"
+  },
+  {
+    "symbol": "^VIX",
+    "role": "input",
+    "leverage": null,
+    "reference": null,
+    "seedFile": "^VIX.csv"
+  },
+  {
+    "symbol": "^IRX",
+    "role": "input",
+    "leverage": null,
+    "reference": null,
+    "seedFile": "^IRX.csv"
+  },
+  {
+    "symbol": "SPCX",
+    "role": "reference",
+    "leverage": 1,
+    "reference": null,
+    "seedFile": "SPCX.csv"
+  },
+  {
+    "symbol": "SPAX",
+    "role": "monitor",
+    "leverage": 2,
+    "reference": "SPCX",
+    "seedFile": null,
+    "facts": {
+      "launchDate": "unconfirmed",
+      "yahooSymbol": "unconfirmed",
+      "issuer": "unconfirmed",
+      "expenseRatio": "unconfirmed",
+      "listedOptions": "unconfirmed",
+      "aum": "unconfirmed",
+      "volume": "unconfirmed"
+    }
+  }
+]

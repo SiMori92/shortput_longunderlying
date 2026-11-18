@@ -1,0 +1,5 @@
+PASS: isolated Git evaluation excludes runtime/account/auth JSON, .env files, QR, dependencies, builds and documented backup paths.
+PASS: .env.example, Railway config, Dockerfile, lockfile, seed history and parity fixtures remain includable.
+PASS: scanned 302 candidate files for private-key, GitHub-token, AWS-key and API-key patterns; no matches.
+LIMITATION: pattern scan is not a guarantee that arbitrary secrets are absent; test credentials are intentionally in tests/smoke tools.
+LIMITATION: WebApp has no Git repository yet; no index, remote, commit history or CI status was available to inspect.

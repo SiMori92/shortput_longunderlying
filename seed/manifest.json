@@ -1,0 +1,12 @@
+{
+  "source": "Backtest/Backtest_app/v2_engine/data_merged_2026-11-16",
+  "asOf": "2026-11-16",
+  "files": {
+    "SOXL.csv": "cc264331e0f1b609b156839c713676eacd26ae5a96c2601366405e08b27dbaa9",
+    "SOXX.csv": "e7aad94d79237589e4240aefcc103357f8feefffc102af44fff93319a1d084ea",
+    "SPCX.csv": "351915f1f2a583183938ef435b1b642c2b4c5a6f4911a18bf0da464be16af69a",
+    "SPY.csv": "d7e13c553a71ef67ccd0003e3d4114ffe7ef3ae9f4c79d72f247786f16f5130b",
+    "^IRX.csv": "169660ca2f6e5bc5efb1fe4c881cd0e3113174672667b6b3d6fd74e3205ecee2",
+    "^VIX.csv": "82de4d22cb49e8b9c799e96f9b1b617e745b2184ce89477d3c545864778bd54f"
+  }
+}

@@ -1,0 +1,3 @@
+Docker executable lookup: None
+Docker build, compose up and container-volume restart tests: NOT RUN (Docker is unavailable).
+Compose YAML parse: PASS (syntax only; Docker unavailable)

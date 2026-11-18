@@ -1,0 +1,64 @@
+
+> strategy-monitor@0.1.0 lint /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> eslint .
+
+
+> strategy-monitor@0.1.0 typecheck /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> tsc --noEmit
+
+
+> strategy-monitor@0.1.0 build /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> pnpm test && next build
+
+
+> strategy-monitor@0.1.0 test /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> vitest run
+
+
+ RUN  v4.1.12 /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+
+
+ Test Files  16 passed (16)
+      Tests  85 passed (85)
+   Start at  16:13:24
+   Duration  2.60s (transform 824ms, setup 0ms, import 2.67s, tests 6.51s, environment 1ms)
+
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config.ts took 292ms
+- Experiments (use with caution):
+  ⨯ turbopackFileSystemCacheForDev
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 678ms
+  Running TypeScript ...
+  Finished TypeScript in 905ms ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/4) ...
+  Generating static pages using 9 workers (1/4) 
+  Generating static pages using 9 workers (2/4) 
+  Generating static pages using 9 workers (3/4) 
+✓ Generating static pages using 9 workers (4/4) in 53ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[section]
+├ ƒ /api/health
+├ ƒ /api/portfolio
+├ ƒ /api/runs
+├ ƒ /gate
+├ ƒ /portfolio
+└ ƒ /puts
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> strategy-monitor@0.1.0 lint /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> eslint .
+
+
+> strategy-monitor@0.1.0 typecheck /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> tsc --noEmit
+

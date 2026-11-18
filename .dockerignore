@@ -1,0 +1,16 @@
+node_modules
+.next
+data
+.e2e-data
+.env*
+.auth-setup
+.venv*
+__pycache__
+test-results
+playwright-report
+reports
+.git
+*.tsbuildinfo
+.DS_Store
+backups
+strategy-data*.tgz

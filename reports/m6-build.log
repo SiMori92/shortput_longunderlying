@@ -1,0 +1,50 @@
+
+> strategy-monitor@0.1.0 build /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> pnpm test && next build
+
+
+> strategy-monitor@0.1.0 test /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+> vitest run
+
+
+ RUN  v4.1.12 /Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp
+
+
+ Test Files  18 passed (18)
+      Tests  105 passed (105)
+   Start at  16:47:37
+   Duration  3.56s (transform 1.02s, setup 0ms, import 3.23s, tests 11.31s, environment 1ms)
+
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config.ts took 56ms
+- Experiments (use with caution):
+  ⨯ turbopackFileSystemCacheForDev
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 598ms
+  Running TypeScript ...
+  Finished TypeScript in 1383ms ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/5) ...
+  Generating static pages using 9 workers (1/5) 
+  Generating static pages using 9 workers (2/5) 
+  Generating static pages using 9 workers (3/5) 
+✓ Generating static pages using 9 workers (5/5) in 79ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[section]
+├ ƒ /api/health
+├ ƒ /api/monitors
+├ ƒ /api/portfolio
+├ ƒ /api/runs
+├ ƒ /gate
+├ ƒ /portfolio
+├ ƒ /puts
+└ ƒ /spax
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
