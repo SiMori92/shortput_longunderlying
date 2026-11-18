@@ -5,6 +5,7 @@ import { afterEach, expect, it } from "vitest";
 import { seedData } from "../../src/data/seed";
 import { readJson } from "../../src/data/store";
 import { MonitorConfigsSchema } from "../../src/schemas/monitor";
+import { UnderlyingsSchema } from "../../src/schemas/config";
 import { PortfolioEntriesSchema } from "../../src/schemas/portfolio";
 import { readPortfolio, savePortfolio, PortfolioInputError } from "../../src/portfolio/service";
 import { analyzeRun } from "../../src/runs/analysis";
@@ -58,4 +59,14 @@ it("builds SPAX features against SPCX and explains insufficient history honestly
   const run = analyzeRun({ type: "final", timestamp: "2026-11-16T21:20:00.000Z", asOf: "2026-11-16" }, features, rules, history, [], [], [], { symbol: "SPAX", reference: "SPCX" });
   expect(run.symbol).toBe("SPAX"); expect(run.gate).toBeNull(); expect(run.freshness.status).toBe("blocked");
   expect(run.freshness.issues.find(i => i.code === "history")?.message).toBe("Insufficient history: 3 SPCX sessions stored; the gate needs SMA200 plus RV60 warm-up");
+});
+it("fills sourced instrument facts on an existing volume without overwriting recorded ones", async () => {
+  const d = await temp(); await seedData(d);
+  const file = path.join(d, "config/underlyings.json"), list = await readJson(file, UnderlyingsSchema);
+  const manual = { value: "Manually recorded issuer", source: "https://example.com/issuer", checkedAt: "2026-11-01T00:00:00Z" };
+  await writeFile(file, JSON.stringify(list.map(u => u.symbol === "SPAX" ? { ...u, facts: { ...u.facts!, issuer: manual, aum: "unconfirmed", listedOptions: "unconfirmed" } } : u)));
+  await seedData(d);
+  const facts = (await readJson(file, UnderlyingsSchema)).find(u => u.symbol === "SPAX")!.facts!;
+  expect(facts.issuer).toEqual(manual);
+  expect(facts.aum).toMatchObject({ value: 49943100 }); expect(facts.listedOptions).toMatchObject({ value: true });
 });

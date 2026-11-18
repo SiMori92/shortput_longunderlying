@@ -34,7 +34,18 @@ async function mergeReviewed<T extends { date: string }>(file: string, bundled: 
   if (added) { await atomicWrite(file, schema, merged); console.info(`[seed] Added ${added} reviewed entr${added === 1 ? "y" : "ies"} to ${path.basename(file)}`); }
 }
 export async function seedData(root = dataRoot(), source = process.cwd()) {
-  const underlyings = await initialize(path.join(root, "config/underlyings.json"), UnderlyingsSchema, () => readJson(path.join(source, "config/underlyings.json"), UnderlyingsSchema));
+  const underlyingsFile = path.join(root, "config/underlyings.json"), shippedUnderlyings = await readJson(path.join(source, "config/underlyings.json"), UnderlyingsSchema);
+  let underlyings = await initialize(underlyingsFile, UnderlyingsSchema, async () => shippedUnderlyings);
+  // Fill sourced instrument facts that are still "unconfirmed" on the volume; never overwrite a recorded fact.
+  let filled = 0;
+  underlyings = underlyings.map(u => {
+    const shipped = shippedUnderlyings.find(s => s.symbol === u.symbol)?.facts;
+    if (!shipped || !u.facts) return u;
+    const facts = { ...u.facts };
+    for (const key of Object.keys(facts) as (keyof typeof facts)[]) if (facts[key] === "unconfirmed" && shipped[key] !== "unconfirmed") { facts[key] = shipped[key]; filled++; }
+    return { ...u, facts };
+  });
+  if (filled) { await atomicWrite(underlyingsFile, UnderlyingsSchema, underlyings); console.info(`[seed] Added ${filled} sourced instrument fact${filled === 1 ? "" : "s"}`); }
   for (const rule of ["v3_1.json", "archive/v3.json"]) await initialize(path.join(root, "config/rules", rule), RulesSchema, () => readJson(path.join(source, "config/rules", rule), RulesSchema));
   await mergeReviewed(path.join(root, "config/known-splits.json"), path.join(source, "config/known-splits.json"), KnownSplitsSchema);
   await mergeReviewed(path.join(root, "config/known-gaps.json"), path.join(source, "config/known-gaps.json"), KnownGapsSchema);

@@ -48,12 +48,32 @@
     "reference": "SPCX",
     "seedFile": null,
     "facts": {
-      "launchDate": "unconfirmed",
+      "launchDate": {
+        "value": "2026-06-15",
+        "source": "https://www.rexshares.com/SPAX/",
+        "checkedAt": "2026-11-18T17:44:29Z"
+      },
       "yahooSymbol": "unconfirmed",
-      "issuer": "unconfirmed",
-      "expenseRatio": "unconfirmed",
-      "listedOptions": "unconfirmed",
-      "aum": "unconfirmed",
+      "issuer": {
+        "value": "REX Shares / Tuttle Capital Management (T-REX)",
+        "source": "https://www.rexshares.com/SPAX/",
+        "checkedAt": "2026-11-18T17:44:29Z"
+      },
+      "expenseRatio": {
+        "value": 0.015,
+        "source": "https://www.rexshares.com/SPAX/",
+        "checkedAt": "2026-11-18T17:44:29Z"
+      },
+      "listedOptions": {
+        "value": true,
+        "source": "https://www.rexshares.com/options-now-trading-on-spax-giving-traders-leveraged-optionable-exposure-to-spacex/",
+        "checkedAt": "2026-11-18T17:44:29Z"
+      },
+      "aum": {
+        "value": 49943100,
+        "source": "https://www.rexshares.com/SPAX/",
+        "checkedAt": "2026-11-18T17:44:29Z"
+      },
       "volume": "unconfirmed"
     }
   }

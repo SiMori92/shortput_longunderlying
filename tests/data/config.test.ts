@@ -6,13 +6,16 @@ import { readJson } from "../../src/data/store";
 import { RulesSchema, UnderlyingsSchema } from "../../src/schemas/config";
 import { PortfolioEntrySchema } from "../../src/schemas/portfolio";
 import { RunInputSchema, RunResultSchema } from "../../src/schemas/run";
-it("keeps live V3.1 and archived V3 separate, with unknown SPAX facts", async () => {
+it("keeps live V3.1 and archived V3 separate; SPAX facts are sourced or unconfirmed, never invented", async () => {
   const live = await readJson("config/rules/v3_1.json", RulesSchema);
   const archived = await readJson("config/rules/archive/v3.json", RulesSchema);
   expect(live).toMatchObject({ id: "v3_1", gateMode: "risk-cut", riskCutMultiplier: 0.5, archived: false });
   expect(archived).toMatchObject({ id: "v3_archived", gateMode: "all-conditions", archived: true });
   const under = await readJson("config/underlyings.json", UnderlyingsSchema);
-  expect(Object.values(under.find(u => u.symbol === "SPAX")!.facts!)).toEqual(Array(7).fill("unconfirmed"));
+  const facts = under.find(u => u.symbol === "SPAX")!.facts!;
+  for (const fact of Object.values(facts)) if (fact !== "unconfirmed") expect(fact.source).toMatch(/^https:\/\//);
+  // Provider-derived facts come from validated Yahoo updates, never the config file.
+  expect([facts.yahooSymbol, facts.volume]).toEqual(["unconfirmed", "unconfirmed"]);
 });
 it("bundled CSVs match their recorded source hashes", async () => {
   const manifest = await readJson("seed/manifest.json", z.object({ files: z.record(z.string(), z.string().regex(/^[a-f0-9]{64}$/)) }));
