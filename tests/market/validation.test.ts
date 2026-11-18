@@ -69,3 +69,14 @@ it("Yahoo rejects schema and identity mismatches", async () => {
   await expect(fetchChart("SOXL", undefined, options.now, async () => Response.json({ chart: { error: null, result: [wrong] } }))).rejects.toThrow("identity");
   await expect(fetchChart("SOXL", undefined, options.now, async () => Response.json({ bad: true }))).rejects.toThrow();
 });
+it("excuses only reviewed gaps for the missing-session check", () => {
+  const value = chart([bar("2026-11-13"), bar("2026-11-17")], "^IRX");
+  expect(validateUpdate("^IRX", [], value, { ...options, knownGaps: [{ date: "2026-11-16" }] }).issues.some(i => i.code === "missing")).toBe(false);
+  expect(validateUpdate("^IRX", [], value, { ...options, knownGaps: [{ date: "2026-11-12" }] }).issues.some(i => i.code === "missing")).toBe(true);
+});
+it("accepts a split only when its date and factor were reviewed", () => {
+  const value = { ...chart([bar("2026-11-16"), bar("2026-11-17")], "SOXX"), events: { splits: { a: { date: Date.parse("2026-11-05T14:30:00Z") / 1000, numerator: 3, denominator: 1, splitRatio: "3:1" } } } } satisfies YahooChart;
+  expect(validateUpdate("SOXX", [bar("2026-11-16")], value, options).issues.some(i => i.code === "split")).toBe(true);
+  expect(validateUpdate("SOXX", [bar("2026-11-16")], value, { ...options, knownSplits: [{ date: "2026-11-05", factor: 2 }] }).issues.some(i => i.code === "split")).toBe(true);
+  expect(validateUpdate("SOXX", [bar("2026-11-16")], value, { ...options, knownSplits: [{ date: "2026-11-05", factor: 3 }] }).issues.some(i => i.code === "split")).toBe(false);
+});

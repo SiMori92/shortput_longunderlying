@@ -106,7 +106,9 @@ pnpm run:now catchup
 
 Storage additions:
 
-- `data/config/known-splits.json`: reviewed split dates/factors; seeded with the two supplied SOXL events. It does not silently approve newly observed events.
+- `data/config/known-splits.json`: reviewed split dates/factors (SOXL 2015/2021, SOXX 2026-11-05 ×3). It does not silently approve newly observed events.
+- `data/config/known-gaps.json`: reviewed NYSE sessions with no observation by design (^IRX bond-market holidays).
+- On every start, entries newly added to the bundled `config/known-splits.json` / `config/known-gaps.json` are merged into the volume copies; existing volume entries are never removed or changed.
 - `data/updates/latest.json`: per-symbol update status, expected/actual dates and issues.
 - `data/runs/{date}_preview.json`, `{date}_final.json`, `{date}_catchup.json`: validated run documents.
 - `data/runs/{date}_{type}.failed.json`: blocked final/catch-up attempts; prior successful finals are retained.
@@ -123,8 +125,8 @@ Run JSON includes gate distances and close calls, next-close core estimates, mod
 
 A real catch-up for **17 Nov 2026** wrote a valid blocked RunResult. It recovered SPCX from 98 seed bars to **110 bars through 17 Nov**, loaded **109 SPAX bars through 17 Nov**, and extended SOXL/SPY/VIX. It refused to promote a valid final because:
 
-1. Yahoo reports a **SOXX 3-for-1 split dated 5 Nov 2026**, absent from the reviewed split list. SOXX history was retained unchanged. This event needs source/seed review before adding it to the known list; the updater never self-approves a split.
-2. Seed **^IRX lacks 11 Oct 2010 and 11 Nov 2016**, both NYSE sessions. Targeted Yahoo requests for those dates returned no observations. The stricter live validation blocks them; the reference backtest's forward-fill remains unchanged. A verified replacement or an explicit change to the missing-RF policy is needed. No rate was invented.
+1. **Resolved:** the **SOXX 3-for-1 split dated 5 Nov 2026** was confirmed by the owner and added to `config/known-splits.json`. Stored SOXX history was already split-adjusted (no 3× step), so no bars were rewritten.
+2. **Resolved:** ^IRX has no observations for **11 Oct 2010 (Columbus Day)** and **11 Nov 2016 (Veterans Day)**: NYSE sessions when the US bond market was closed. They are listed in `config/known-gaps.json` as reviewed gaps; the engine forward-fills the prior rate, as the reference backtest does. Any other missing session still blocks. No rate was invented.
 3. No current account snapshot exists. Account actions stay unconfirmed until a validated snapshot is supplied through the authenticated M5 API; sign in through M8 login to enter it.
 
 The first two findings must be resolved before a live actionable final can be accepted. Healthy preview/final/catch-up and replay persistence are tested with deterministic provider responses; the real market response is deliberately retained as blocked. SPAX checklist calculations and manual option observations are implemented in M6.
@@ -244,7 +246,7 @@ See `reports/M8.md` and `reports/m8-*.log` for actual test output. Unit/API cove
 
 This environment has no Docker executable. Docker image build, Compose startup/restart with a persistent volume, VPS deployment, real-phone/mobile-data access and three unattended US trading days have **not** been verified. These require a Docker host, the owner's enrolled credentials/domain, and elapsed trading sessions. Standalone Node startup/restart checks are useful local evidence but do not substitute for those acceptance checks. No remote deployment is claimed.
 
-Known market blockers are unchanged: the unreviewed SOXX split, two missing historical IRX sessions and the missing real account snapshot. Authentication does not override blocked recommendations or make SPAX qualified. No broker integration, orders or alerts were added.
+The SOXX split and ^IRX gap blockers are resolved (see above); recommendations still require a current account snapshot. Authentication does not override blocked recommendations or make SPAX qualified. No broker integration, orders or alerts were added.
 
 ## Railway — Git auto-deploy
 

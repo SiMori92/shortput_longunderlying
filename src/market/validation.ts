@@ -11,7 +11,7 @@ export function canAcceptToday(chart: YahooChart, now: Date): boolean {
   return !!regular && marketDate(new Date(regular.start * 1000)) === marketDate(now) && now.getTime() >= regular.end * 1000;
 }
 export function validateUpdate(symbol: string, existing: readonly Bar[], chart: YahooChart, options: {
-  now: Date; asOf: string; preview: boolean; knownSplits: readonly { date: string; factor: number }[]; reference: boolean;
+  now: Date; asOf: string; preview: boolean; knownSplits: readonly { date: string; factor: number }[]; knownGaps?: readonly { date: string }[]; reference: boolean;
 }) {
   const issues: DataIssue[] = [], today = marketDate(options.now), finalToday = canAcceptToday(chart, options.now);
   for (const split of Object.values(chart.events?.splits ?? {})) {
@@ -53,9 +53,9 @@ export function validateUpdate(symbol: string, existing: readonly Bar[], chart: 
   if (provisional) { const i = view.findIndex(b => b.date === provisional!.date); if (i >= 0) view[i] = provisional; else view.push(provisional); }
   if (options.reference) for (let i = 1; i < view.length; i++) if (Math.abs(view[i]!.close / view[i - 1]!.close - 1) > .4) issues.push(dataIssue("move", symbol, `Reference daily move >40% at ${view[i]!.date}`));
   if (view.length) {
-    // Audit all history from the first actual bar. No synthetic holiday/session fills.
+    // Audit all history from the first actual bar. No synthetic fills; only reviewed gaps (config/known-gaps.json) are excused.
     try {
-      const dates = new Set(view.map(b => b.date)); const missing = sessions(view[0]!.date, options.asOf).filter(d => !dates.has(d));
+      const dates = new Set([...view.map(b => b.date), ...(options.knownGaps ?? []).map(g => g.date)]); const missing = sessions(view[0]!.date, options.asOf).filter(d => !dates.has(d));
       if (missing.length) issues.push(dataIssue("missing", symbol, `${missing.length} missing NYSE sessions: ${missing.slice(-8).join(", ")}`));
     } catch (e) { issues.push(dataIssue("calendar", symbol, String(e))); }
   }

@@ -1,0 +1,12 @@
+{
+  "^IRX": [
+    {
+      "date": "2010-10-11",
+      "reason": "Columbus Day: NYSE open, US bond market closed; no T-bill quote published"
+    },
+    {
+      "date": "2016-11-11",
+      "reason": "Veterans Day: NYSE open, US bond market closed; no T-bill quote published"
+    }
+  ]
+}

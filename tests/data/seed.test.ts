@@ -27,6 +27,17 @@ describe("seed boundaries", () => {
     expect(await readdir(path.join(d, "bars"))).not.toContain("SPAX.json");
     expect(JSON.parse(await readFile(path.join(d, "portfolio/entries.json"), "utf8"))).toEqual([]);
   });
+  it("adds newly reviewed splits/gaps to an existing volume without removing local entries", async () => {
+    const d = await temp(); await seedData(d);
+    const splits = path.join(d, "config/known-splits.json");
+    await writeFile(splits, JSON.stringify({ SOXL: [{ date: "2015-05-20", factor: 4 }], SPY: [{ date: "2000-01-03", factor: 2 }] }));
+    await seedData(d);
+    const merged = JSON.parse(await readFile(splits, "utf8"));
+    expect(merged.SOXX).toEqual([{ date: "2026-11-05", factor: 3 }]);
+    expect(merged.SOXL.map((s: { date: string }) => s.date)).toEqual(["2015-05-20", "2021-03-02"]);
+    expect(merged.SPY).toEqual([{ date: "2000-01-03", factor: 2 }]);
+    expect(JSON.parse(await readFile(path.join(d, "config/known-gaps.json"), "utf8"))["^IRX"].map((g: { date: string }) => g.date)).toEqual(["2010-10-11", "2016-11-11"]);
+  });
   it("restart preserves valid existing bars; corruption fails closed", async () => {
     const d = await temp(); await seedData(d);
     const file = path.join(d, "bars/SOXL.json");

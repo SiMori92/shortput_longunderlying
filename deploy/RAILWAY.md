@@ -61,7 +61,7 @@ Do not set `RAILWAY_VOLUME_MOUNT_PATH` yourself: Railway provides it when the vo
 4. Enter an accurate portfolio snapshot if ready. Redeploy the same commit once and verify that snapshot persists. This verifies the real Railway volume, not just local filesystem behavior.
 5. Verify sign-out, phone login and the next scheduled runs. Do not treat an HTTP health check as proof Yahoo data or account actions are valid.
 
-Known data-review blockers remain: the SOXX split event, missing historical IRX sessions and the absence of a real account snapshot. Deployment does not bypass them.
+The SOXX split and ^IRX gaps are reviewed and ship in `config/`; a redeploy merges them into the volume automatically. Recommendations still need a same-day account snapshot.
 
 ## 5. Subsequent automatic deployments
 

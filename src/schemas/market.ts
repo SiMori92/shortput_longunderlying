@@ -5,4 +5,7 @@ export type DataIssue = z.infer<typeof DataIssueSchema>;
 export const SymbolStatusSchema = z.strictObject({ symbol: SymbolSchema, lastDate: DateSchema.nullable(), expectedDate: DateSchema, count: z.number().int().nonnegative(), provisional: z.boolean(), updated: z.boolean(), issues: z.array(DataIssueSchema) });
 export const SplitSchema = z.strictObject({ date: DateSchema, factor: NumberSchema.positive() });
 export const KnownSplitsSchema = z.record(SymbolSchema, z.array(SplitSchema));
+/** Reviewed NYSE sessions with no observation by design (e.g. bond-market holidays for ^IRX). The engine forward-fills them. */
+export const KnownGapSchema = z.strictObject({ date: DateSchema, reason: z.string().min(1) });
+export const KnownGapsSchema = z.record(SymbolSchema, z.array(KnownGapSchema));
 export const MarketFactsSchema = z.strictObject({ checkedAt: z.iso.datetime(), symbol: SymbolSchema, yahooSymbol: z.union([z.literal("unconfirmed"), z.strictObject({ value: SymbolSchema, source: z.url() })]), volume: z.union([z.literal("unconfirmed"), z.strictObject({ value: NumberSchema.nonnegative(), asOf: DateSchema, source: z.url() })]), launchDate: z.literal("unconfirmed"), issuer: z.literal("unconfirmed"), expenseRatio: z.literal("unconfirmed"), listedOptions: z.literal("unconfirmed"), aum: z.literal("unconfirmed"), warnings: z.array(z.string()) });

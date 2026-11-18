@@ -5,7 +5,7 @@ import Papa from "papaparse";
 import { z } from "zod";
 import { BarsSchema, type Bars } from "../schemas/bars";
 import { RulesSchema, UnderlyingsSchema } from "../schemas/config";
-import { KnownSplitsSchema } from "../schemas/market";
+import { KnownGapsSchema, KnownSplitsSchema } from "../schemas/market";
 import { JournalSchema, PortfolioEntriesSchema } from "../schemas/portfolio";
 import { atomicWrite, dataRoot, isMissing, readJson } from "./store";
 const numeric = z.string().min(1).transform(Number).pipe(z.number().finite());
@@ -19,10 +19,23 @@ async function initialize<T>(file: string, schema: z.ZodType<T>, create: () => P
   try { return await readJson(file, schema); } catch (e) { if (!isMissing(e)) throw e; }
   return atomicWrite(file, schema, await create());
 }
+/** Add reviewed entries shipped with a new release to an existing volume. Never removes or edits entries already on the volume. */
+async function mergeReviewed<T extends { date: string }>(file: string, bundled: string, schema: z.ZodType<Record<string, T[]>>): Promise<void> {
+  const current = await initialize(file, schema, () => readJson(bundled, schema));
+  const shipped = await readJson(bundled, schema);
+  let added = 0; const merged: Record<string, T[]> = { ...current };
+  for (const [symbol, entries] of Object.entries(shipped)) {
+    const have = merged[symbol] ?? [];
+    const extra = entries.filter(e => !have.some(h => h.date === e.date));
+    if (extra.length) { merged[symbol] = [...have, ...extra].sort((a, b) => a.date.localeCompare(b.date)); added += extra.length; }
+  }
+  if (added) { await atomicWrite(file, schema, merged); console.info(`[seed] Added ${added} reviewed entr${added === 1 ? "y" : "ies"} to ${path.basename(file)}`); }
+}
 export async function seedData(root = dataRoot(), source = process.cwd()) {
   const underlyings = await initialize(path.join(root, "config/underlyings.json"), UnderlyingsSchema, () => readJson(path.join(source, "config/underlyings.json"), UnderlyingsSchema));
   for (const rule of ["v3_1.json", "archive/v3.json"]) await initialize(path.join(root, "config/rules", rule), RulesSchema, () => readJson(path.join(source, "config/rules", rule), RulesSchema));
-  await initialize(path.join(root, "config/known-splits.json"), KnownSplitsSchema, () => readJson(path.join(source, "config/known-splits.json"), KnownSplitsSchema));
+  await mergeReviewed(path.join(root, "config/known-splits.json"), path.join(source, "config/known-splits.json"), KnownSplitsSchema);
+  await mergeReviewed(path.join(root, "config/known-gaps.json"), path.join(source, "config/known-gaps.json"), KnownGapsSchema);
   await initialize(path.join(root, "config/monitors.json"), MonitorConfigsSchema, () => readJson(path.join(source, "config/monitors.json"), MonitorConfigsSchema));
   await initialize(path.join(root, "monitors/observations.json"), ObservationsSchema, async () => []);
   const counts: Record<string, number> = {};
