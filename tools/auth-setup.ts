@@ -28,7 +28,10 @@ async function main() {
   const password = await prompt("New password (8+ characters; max 72 UTF-8 bytes): ", true);
   if (password.length < 8 || Buffer.byteLength(password) > 72) throw new Error("Password must have at least 8 characters and at most 72 UTF-8 bytes.");
   if (password !== await prompt("Confirm password: ", true)) throw new Error("Passwords differ");
-  const origin = await prompt("App origin (https://your-host, or http://127.0.0.1:3000 locally): ");
+  const entered = (await prompt("App origin (https://your-host, or http://127.0.0.1:3000 locally): ")).trim();
+  let origin = entered;
+  try { origin = new URL(entered).origin; } catch { /* leave as entered; schema reports it */ }
+  if (origin !== entered) stdout.write(`Using origin ${origin} (path and trailing slash removed).\n`);
   const config = AuthConfigSchema.parse({ AUTH_USERNAME: username, AUTH_PASSWORD_HASH: await hash(password, 12), SESSION_SECRET: randomBytes(48).toString("hex"), APP_ORIGIN: origin });
   // Quotes preserve bcrypt '$' characters in shell/dotenv environments.
   await writeFile(".env.local", Object.entries(config).map(([key,value]) => `${key}='${value}'`).join("\n") + "\n", { flag: "wx", mode: 0o600 });
