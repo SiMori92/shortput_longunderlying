@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-const SessionSchema = z.strictObject({ user: z.literal("owner"), totp: z.literal(true), exp: z.number().int().positive() });
+const SessionSchema = z.strictObject({ user: z.literal("owner"), exp: z.number().int().positive() });
 export const SESSION_COOKIE = "__Host-strategy_session";
 /** Signed, expiring owner session. No development bypass. */
 export function authenticated(request: Request, now = Date.now()): boolean {
@@ -25,7 +25,7 @@ export function sameOrigin(request: Request): boolean {
 export function issueSession(now = Date.now()): string {
   const secret = process.env.SESSION_SECRET;
   if (!secret || Buffer.byteLength(secret) < 32) throw new Error("Session signing is not configured");
-  const body = Buffer.from(JSON.stringify(SessionSchema.parse({ user: "owner", totp: true, exp: Math.floor(now / 1000) + 12 * 3600 }))).toString("base64url");
+  const body = Buffer.from(JSON.stringify(SessionSchema.parse({ user: "owner", exp: Math.floor(now / 1000) + 12 * 3600 }))).toString("base64url");
   return `${body}.${createHmac("sha256", secret).update(body).digest("base64url")}`;
 }
 export const sessionCookieOptions = { httpOnly: true, secure: true, sameSite: "strict" as const, path: "/", maxAge: 12 * 3600 };

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const chunks: Uint8Array[] = []; let size = 0;
     while (true) { const { value, done } = await reader.read(); if (done) break; size += value.length; if (size > 2048) { await reader.cancel(); return reply(413, "Request too large"); } chunks.push(value); }
     const input = LoginInputSchema.safeParse(JSON.parse(Buffer.concat(chunks).toString("utf8")));
-    if (!input.success) return reply(400, "Enter a password and six-digit authenticator code");
+    if (!input.success) return reply(400, "Enter your account name and password");
     const result = await login(input.data);
     const response = reply(result.status, result.message);
     if (result.retryAfter) response.headers.set("Retry-After", String(result.retryAfter));

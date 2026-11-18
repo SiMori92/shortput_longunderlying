@@ -4,19 +4,19 @@ import { authenticated, SESSION_COOKIE } from "../../src/auth/session";
 import { POST, GET } from "../../src/app/api/runs/route";
 const secret = "test-only-session-secret-with-32-bytes-minimum";
 afterEach(() => vi.unstubAllEnvs());
-function cookie(exp = Math.floor(Date.now() / 1000) + 3600, totp = true) {
-  const body = Buffer.from(JSON.stringify({ user: "owner", totp, exp })).toString("base64url");
+function cookie(exp = Math.floor(Date.now() / 1000) + 3600, extra: Record<string, unknown> = {}) {
+  const body = Buffer.from(JSON.stringify({ user: "owner", exp, ...extra })).toString("base64url");
   return `${SESSION_COOKIE}=${body}.${createHmac("sha256", secret).update(body).digest("base64url")}`;
 }
 function request(body: string, headers: Record<string, string> = {}) { return new Request("https://monitor.example/api/runs", { method: "POST", headers: { cookie: cookie(), origin: "https://monitor.example", "content-type": "application/json", ...headers }, body }); }
-it("run APIs fail closed without a signed, unexpired password/TOTP session", async () => {
+it("run APIs fail closed without a signed, unexpired signed-in session", async () => {
   vi.stubEnv("SESSION_SECRET", ""); expect((await POST(request('{"type":"final"}'))).status).toBe(401);
   vi.stubEnv("SESSION_SECRET", secret);
   expect((await GET(new Request("https://monitor.example/api/runs"))).status).toBe(401);
   expect(authenticated(request("{}"))).toBe(true);
   expect(authenticated(request("{}", { cookie: `${cookie()}tamper` }))).toBe(false);
   expect(authenticated(request("{}", { cookie: cookie(1) }))).toBe(false);
-  expect(authenticated(request("{}", { cookie: cookie(undefined, false) }))).toBe(false);
+  expect(authenticated(request("{}", { cookie: cookie(undefined, { admin: true }) }))).toBe(false);
   expect(authenticated(request("{}", { cookie: cookie(Math.floor(Date.now() / 1000) + 86400) }))).toBe(false);
 });
 it("valid authentication still requires same-origin JSON and a strict bounded input", async () => {

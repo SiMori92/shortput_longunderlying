@@ -5,11 +5,11 @@ export const runtime="nodejs";
 const headers={"Cache-Control":"no-store"};
 function error(kind:"unauthorized"|"forbidden"|"invalid-input"|"conflict"|"unavailable",message:string,status:number){return Response.json(MonitorErrorSchema.parse({error:kind,message}),{status,headers});}
 export async function GET(request:Request){
-  if(!authenticated(request))return error("unauthorized","Password/TOTP session required. Sign in to continue.",401);
+  if(!authenticated(request))return error("unauthorized","Signed-in session required. Sign in to continue.",401);
   try{return Response.json(ObservationStateSchema.parse(await readObservations()),{headers});}catch{return error("unavailable","Stored monitor inputs failed validation.",503);}
 }
 export async function PUT(request:Request){
-  if(!authenticated(request))return error("unauthorized","Password/TOTP session required. Sign in to continue.",401);
+  if(!authenticated(request))return error("unauthorized","Signed-in session required. Sign in to continue.",401);
   if(!sameOrigin(request))return error("forbidden","Same-origin request required.",403);
   if(request.headers.get("content-type")?.split(";")[0]?.trim()!=="application/json")return error("invalid-input","JSON body required.",415);
   let input;

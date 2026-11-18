@@ -21,7 +21,7 @@ const entry = { date: "2026-11-16", accountValue: 100000, shares: 0, openPuts: [
 beforeEach(async () => { root = await mkdtemp(path.join(os.tmpdir(), "strategy-m5-")); await seedData(root); vi.stubEnv("DATA_DIR", root); vi.stubEnv("SESSION_SECRET", secret); });
 afterEach(async () => { vi.unstubAllEnvs(); await rm(root, { recursive: true, force: true }); });
 function request(input: unknown, extra: Record<string,string> = {}) {
-  const body = Buffer.from(JSON.stringify({ user: "owner", totp: true, exp: Math.floor(Date.now()/1000)+3600 })).toString("base64url");
+  const body = Buffer.from(JSON.stringify({ user: "owner", exp: Math.floor(Date.now()/1000)+3600 })).toString("base64url");
   return new Request("https://monitor.example/api/portfolio", { method: "PUT", headers: { cookie: `${SESSION_COOKIE}=${body}.${createHmac("sha256",secret).update(body).digest("base64url")}`, origin: "https://monitor.example", "content-type": "application/json", ...extra }, body: JSON.stringify(input) });
 }
 it("upserts a dated snapshot atomically, preserves other dates and survives fresh reads", async () => {

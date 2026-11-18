@@ -30,7 +30,7 @@ export function PortfolioEditor({ initial, selected, date, authorized }: { initi
   }
   const fieldError = (name: string) => errors[name] ? <small className="field-error" role="alert">{errors[name]}</small> : null;
   return <div className="page-stack portfolio-editor">
-    {!authorized && <div className="notice warning">Saving requires a password/TOTP session. Sign in to save changes.</div>}
+    {!authorized && <div className="notice warning">Saving requires a signed-in session. Sign in to save changes.</div>}
     <div aria-live="polite" role="status">{message}</div>
     <form className="card" onSubmit={snapshot}>
       <div className="section-heading"><h2><Wallet size={20} />Daily snapshot</h2><span className="chip">Entered NAV · SOXL</span></div>

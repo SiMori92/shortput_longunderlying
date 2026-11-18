@@ -27,27 +27,29 @@ Railway's root-owned volume requires the documented UID override for this image.
 
 `railway.json` configures the health endpoint `/api/health`, one instance, sleeping disabled, `/app/data`, retries and the deployment drain period. The first successful deployment can show a locked **Setup required** page until you add owner authentication. A successful health check does not mean live trading recommendations are valid.
 
-## 3. Enroll your login locally
+## 3. Create your login locally
 
-In your local checkout, with Node 24+ and pnpm 10.20.0 installed:
+Login is an account name plus password (no authenticator app). In your local checkout, with Node 24+ and pnpm 10.20.0 installed:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm auth:setup
 ```
 
-Choose your password, confirm it, and enter the exact HTTPS Railway domain with no trailing slash. Open the private `.auth-setup/totp.png`, scan it using your authenticator, and enter its current code to finish enrollment. The command saves `.env.local` with permissions 0600. It refuses to overwrite an existing file; preserve existing credentials rather than regenerating them for a routine deploy.
+Enter an account name (3-64 characters: letters, digits, `. _ @ -`; case-sensitive), choose a password of 14+ characters, confirm it, and enter the exact HTTPS Railway domain with no trailing slash. The command saves `.env.local` with permissions 0600. It refuses to overwrite an existing file; delete the old `.env.local` first if you are deliberately replacing credentials.
 
 In Railway **Variables**, add the four generated values from `.env.local`:
 
 | Name | Value |
 |---|---|
-| `AUTH_PASSWORD_HASH` | Generated password hash |
-| `AUTH_TOTP_SECRET` | Generated authenticator secret |
+| `AUTH_USERNAME` | Your account name |
+| `AUTH_PASSWORD_HASH` | Generated bcrypt password hash (not your password) |
 | `SESSION_SECRET` | Generated session signing secret |
 | `APP_ORIGIN` | Exact HTTPS Railway domain; no trailing slash |
 
-Paste each value **without** the surrounding dotenv single quotes. Preserve `$` characters in the password hash. Save/deploy the variable changes. Keep an encrypted credential backup; remove the QR after enrollment. Do not upload `.env.local`, the QR or runtime data to GitHub. Never prefix these variables with `NEXT_PUBLIC_`.
+Paste each value **without** the surrounding dotenv single quotes. Preserve `$` characters in the password hash. Save/deploy the variable changes. If you previously set `AUTH_TOTP_SECRET`, delete it; it is no longer used. Keep a password-manager backup of the account name and password. Do not upload `.env.local` or runtime data to GitHub. Never prefix these variables with `NEXT_PUBLIC_`.
+
+Five failed sign-ins within 15 minutes lock login for the rest of that window (successful sign-ins don't count). Because there is no second factor, use a long, unique password.
 
 Do not set `RAILWAY_VOLUME_MOUNT_PATH` yourself: Railway provides it when the volume is attached. Do not override `HOSTNAME` with a loopback address. Railway's Docker runtime binds to `0.0.0.0` and honors `PORT`.
 
@@ -55,7 +57,7 @@ Do not set `RAILWAY_VOLUME_MOUNT_PATH` yourself: Railway provides it when the vo
 
 1. Visit your HTTPS domain: anonymous access redirects to login.
 2. Visit `/api/health`: it should return `status: "ok"`; `strategyReady: false` remains intentional.
-3. Sign in using your enrolled password and six-digit TOTP code; open all seven dashboard pages.
+3. Sign in using your account name and password; open all seven dashboard pages.
 4. Enter an accurate portfolio snapshot if ready. Redeploy the same commit once and verify that snapshot persists. This verifies the real Railway volume, not just local filesystem behavior.
 5. Verify sign-out, phone login and the next scheduled runs. Do not treat an HTTP health check as proof Yahoo data or account actions are valid.
 

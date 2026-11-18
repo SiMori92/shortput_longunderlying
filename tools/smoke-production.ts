@@ -5,7 +5,6 @@ import { createServer, type AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { hashSync } from "bcryptjs";
-import { generateSync } from "otplib";
 import { HealthSchema } from "../src/schemas/api";
 import { AuthResponseSchema } from "../src/schemas/auth";
 import { PortfolioStateSchema } from "../src/schemas/portfolio";
@@ -15,10 +14,10 @@ await new Promise<void>(resolve => probe.listen(0,"127.0.0.1",resolve));
 const port = (probe.address() as AddressInfo).port;
 await new Promise<void>((resolve,reject)=>probe.close(error=>error?reject(error):resolve()));
 const base = `http://127.0.0.1:${port}`, origin = "https://strategy-smoke.example";
-const password = "standalone-smoke-only-password", secret = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP", passwordHash = hashSync(password,10);
+const password = "standalone-smoke-only-password", username = "smoke-owner", passwordHash = hashSync(password,10);
 let child: ChildProcess | undefined, log = "";
 function launch(configured: boolean, volume: boolean) {
-  const env: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", HOSTNAME: "0.0.0.0", PORT: String(port), DATA_DIR: path.join(staging,"data"), APP_ORIGIN: origin, AUTH_PASSWORD_HASH: configured ? passwordHash : "", AUTH_TOTP_SECRET: configured ? secret : "", SESSION_SECRET: configured ? "standalone-smoke-only-session-secret-32-bytes" : "", RAILWAY_ENVIRONMENT_ID: "isolated-railway-smoke", RAILWAY_VOLUME_MOUNT_PATH: volume ? staging : "" };
+  const env: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", HOSTNAME: "0.0.0.0", PORT: String(port), DATA_DIR: path.join(staging,"data"), APP_ORIGIN: origin, AUTH_PASSWORD_HASH: configured ? passwordHash : "", AUTH_USERNAME: configured ? username : "", SESSION_SECRET: configured ? "standalone-smoke-only-session-secret-32-bytes" : "", RAILWAY_ENVIRONMENT_ID: "isolated-railway-smoke", RAILWAY_VOLUME_MOUNT_PATH: volume ? staging : "" };
   const running = spawn(process.execPath, ["server.js"], { cwd: staging, env, stdio: ["ignore","pipe","pipe"] });
   child = running;
   running.stdout!.on("data", data => { log += String(data); }); running.stderr!.on("data", data => { log += String(data); });
@@ -66,7 +65,7 @@ try {
   assert(seed.includes('"2010-')); assert(log.includes("[scheduler] Registered"));
   await stop(); await start(true);
   const headers = {origin,"content-type":"application/json","x-forwarded-proto":"https","x-forwarded-host":"strategy-smoke.example"};
-  const input = {password,token:generateSync({secret})};
+  const input = {username,password};
   const result = await fetch(`${base}/api/auth/login`,{method:"POST",headers,body:JSON.stringify(input)});
   assert.equal(result.status,200); assert(AuthResponseSchema.parse(await result.json()).ok);
   const issued=result.headers.get("set-cookie")!;
@@ -79,7 +78,7 @@ try {
   await stop(); await start(true);
   assert.equal(await readFile(path.join(staging,"data/bars/SOXL.json"),"utf8"),seed);
   state = PortfolioStateSchema.parse(await (await fetch(`${base}/api/portfolio`,{headers:authorized})).json()); assert.deepEqual(state.entries,[entry]);
-  assert.equal((await fetch(`${base}/api/auth/login`,{method:"POST",headers,body:JSON.stringify(input)})).status,401);
+  assert.equal((await fetch(`${base}/api/auth/login`,{method:"POST",headers,body:JSON.stringify({...input,password:"wrong-password-value"})})).status,401);
   let html="";
   for (const [url,title] of [["/","Today"],["/gate","Gate"],["/puts","Puts"],["/portfolio","Portfolio"],["/spax","SPAX monitor"],["/backtest","Backtest"],["/rules","Rules"]]) {
     const response=await fetch(base+url,{headers:authorized,redirect:"manual"}); assert.equal(response.status,200); assert.equal(response.headers.get("cache-control"),"no-store");
@@ -93,9 +92,9 @@ try {
   assert.equal((await fetch(`${base}/api/portfolio`)).status,401);
   console.info("PASS: standalone package excludes runtime data, env, enrollment, tests and reports");
   console.info("PASS: dynamic PORT + 0.0.0.0 startup seeds an empty volume directory and registers the ET scheduler");
-  console.info("PASS: unsigned pages/APIs stay private; password + TOTP issues a Secure/HttpOnly/SameSite cookie");
+  console.info("PASS: unsigned pages/APIs stay private; account name + password issues a Secure/HttpOnly/SameSite cookie");
   console.info("PASS: configured HTTPS origin works through simulated proxy headers; cross-site writes return 403");
-  console.info("PASS: restart preserves bars, API-entered snapshot, signed session and TOTP replay state");
+  console.info("PASS: restart preserves bars, API-entered snapshot, signed session; wrong password still rejected");
   console.info("PASS: all seven authenticated pages render expected content; browser JS asset is served");
   console.info("PASS: logout endpoint works and unsigned API access remains blocked");
   console.info("LIMITATION: simulated Railway environment on local Node; actual Docker, Railway volume permissions, TLS and remote service settings are unverified");

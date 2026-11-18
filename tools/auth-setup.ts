@@ -1,12 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile, chmod } from "node:fs/promises";
-import path from "node:path";
+import { writeFile } from "node:fs/promises";
 import { stdin, stdout } from "node:process";
 import { hash } from "bcryptjs";
-import { generateSecret, generateURI, verify } from "otplib";
-import QRCode from "qrcode";
 import { AuthConfigSchema } from "../src/auth/config";
-/** No password or TOTP secret is passed through argv, terminal echo, or logs. */
+/** No password or secret is passed through argv, terminal echo, or logs. */
 async function prompt(label: string, hidden = false): Promise<string> {
   stdin.setRawMode(true); stdin.resume(); stdin.setEncoding("utf8");
   return new Promise((resolve, reject) => {
@@ -26,23 +23,15 @@ async function prompt(label: string, hidden = false): Promise<string> {
 }
 async function main() {
   if (!stdin.isTTY || !stdout.isTTY) throw new Error("Run auth:setup in an interactive terminal; credentials are never accepted as arguments.");
+  const username = (await prompt("Account name (3-64 chars: letters, digits, . _ @ -): ")).trim();
+  if (!/^[A-Za-z0-9._@-]{3,64}$/.test(username)) throw new Error("Account name must be 3-64 characters: letters, digits, . _ @ -");
   const password = await prompt("New password (14+ characters; max 72 UTF-8 bytes): ", true);
   if (password.length < 14 || Buffer.byteLength(password) > 72) throw new Error("Password must have at least 14 characters and at most 72 UTF-8 bytes.");
   if (password !== await prompt("Confirm password: ", true)) throw new Error("Passwords differ");
   const origin = await prompt("App origin (https://your-host, or http://127.0.0.1:3000 locally): ");
-  const secret = generateSecret();
-  const config = AuthConfigSchema.parse({ AUTH_PASSWORD_HASH: await hash(password, 12), AUTH_TOTP_SECRET: secret, SESSION_SECRET: randomBytes(48).toString("hex"), APP_ORIGIN: origin });
-  const dir = path.resolve(".auth-setup");
-  await mkdir(dir, { recursive: true, mode: 0o700 }); await chmod(dir, 0o700);
-  const qr = path.join(dir, "totp.png");
-  // Exclusive create prevents an accidental credential overwrite.
-  const png = await QRCode.toBuffer(generateURI({ issuer: "Strategy Monitor", label: "owner", secret }), { width: 400 });
-  await writeFile(qr, png, { flag: "wx", mode: 0o600 });
-  stdout.write(`Open ${qr} locally and scan it in your authenticator. Keep this QR private.\n`);
-  const token = await prompt("Enter a code to confirm enrollment: ", true);
-  if (!/^\d{6}$/.test(token) || !(await verify({ secret, token, epochTolerance: 30 })).valid) throw new Error("Authenticator confirmation failed. Remove .auth-setup/totp.png and retry.");
+  const config = AuthConfigSchema.parse({ AUTH_USERNAME: username, AUTH_PASSWORD_HASH: await hash(password, 12), SESSION_SECRET: randomBytes(48).toString("hex"), APP_ORIGIN: origin });
   // Quotes preserve bcrypt '$' characters in shell/dotenv environments.
   await writeFile(".env.local", Object.entries(config).map(([key,value]) => `${key}='${value}'`).join("\n") + "\n", { flag: "wx", mode: 0o600 });
-  stdout.write("Saved .env.local (0600). Restart the app. Store an encrypted backup, then delete .auth-setup/totp.png. Never commit or share these files.\n");
+  stdout.write("Saved .env.local (0600). Restart the app. Never commit or share this file.\n");
 }
 main().catch(error => { console.error(error instanceof Error && !error.name.includes("Zod") ? error.message : "Invalid setup configuration. Check the origin and retry."); process.exitCode = 1; });

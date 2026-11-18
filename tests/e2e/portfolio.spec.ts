@@ -8,7 +8,7 @@ test.beforeAll(async () => {
 });
 const secret = "playwright-only-m5-session-secret-32bytes-minimum";
 function cookie() {
-  const body = Buffer.from(JSON.stringify({ user: "owner", totp: true, exp: Math.floor(Date.now()/1000)+3600 })).toString("base64url");
+  const body = Buffer.from(JSON.stringify({ user: "owner", exp: Math.floor(Date.now()/1000)+3600 })).toString("base64url");
   return `__Host-strategy_session=${body}.${createHmac("sha256",secret).update(body).digest("base64url")}`;
 }
 test("authorized portfolio is editable; independent unsigned API requests fail closed", async ({ page, request }) => {

@@ -2,51 +2,58 @@ import { mkdtemp, rm, mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { hashSync } from "bcryptjs";
-import { generateSync } from "otplib";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { login, LoginInputSchema } from "../../src/auth/login";
 import { authConfig } from "../../src/auth/config";
 import { authenticated, issueSession, sameOrigin, SESSION_COOKIE } from "../../src/auth/session";
 import { POST } from "../../src/app/api/auth/login/route";
 import { POST as logout } from "../../src/app/api/auth/logout/route";
-const password = "test-only-password-2026", secret = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP";
+const password = "test-only-password-2026", username = "test-owner";
 const hash = hashSync(password, 10), now = 1795014000000;
 let root: string;
-const token = (epoch = now) => generateSync({ secret, epoch: Math.floor(epoch / 1000) });
 const req = (input: unknown, origin = "https://monitor.example") => new Request("https://monitor.example/api/auth/login", { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(input) });
-beforeEach(async () => { root = await mkdtemp(path.join(os.tmpdir(), "strategy-auth-")); vi.stubEnv("DATA_DIR", root); vi.stubEnv("AUTH_PASSWORD_HASH", hash); vi.stubEnv("AUTH_TOTP_SECRET", secret); vi.stubEnv("SESSION_SECRET", "test-session-secret-at-least-32-bytes-long"); vi.stubEnv("APP_ORIGIN", "https://monitor.example"); });
+beforeEach(async () => { root = await mkdtemp(path.join(os.tmpdir(), "strategy-auth-")); vi.stubEnv("DATA_DIR", root); vi.stubEnv("AUTH_PASSWORD_HASH", hash); vi.stubEnv("AUTH_USERNAME", username); vi.stubEnv("SESSION_SECRET", "test-session-secret-at-least-32-bytes-long"); vi.stubEnv("APP_ORIGIN", "https://monitor.example"); });
 afterEach(async () => { vi.unstubAllEnvs(); await rm(root, { recursive: true, force: true }); });
-describe("password + TOTP", () => {
-  it("accepts both factors and rejects replay across subsequent calls", async () => {
-    expect((await login({ password, token: token() }, root, now)).status).toBe(200);
-    expect((await login({ password, token: token() }, root, now)).status).toBe(401);
-    expect((await login({ password, token: token(now + 30_000) }, root, now + 30_000)).status).toBe(200);
+describe("account name + password", () => {
+  it("accepts the configured account name and password", async () => {
+    expect((await login({ username, password }, root, now)).status).toBe(200);
+    expect((await login({ username: ` ${username} `, password }, root, now)).status).toBe(200);
   });
-  it("rejects either wrong factor and stale codes", async () => {
-    expect((await login({ password: "incorrect", token: token() }, root, now)).status).toBe(401);
-    expect((await login({ password, token: token(now - 120_000) }, root, now)).status).toBe(401);
+  it("rejects a wrong account name or wrong password", async () => {
+    expect((await login({ username, password: "incorrect" }, root, now)).status).toBe(401);
+    expect((await login({ username: "someone-else", password }, root, now)).status).toBe(401);
+    expect((await login({ username: "TEST-OWNER", password }, root, now)).status).toBe(401);
   });
-  it("persists the five-attempt limit and resets only the window after 15 minutes", async () => {
-    for (let i = 0; i < 5; i++) expect((await login({ password: "incorrect", token: token() }, root, now)).status).toBe(401);
-    expect(await login({ password, token: token() }, root, now)).toMatchObject({ status: 429, retryAfter: 900 });
-    expect((await login({ password, token: token(now + 900_000) }, root, now + 900_000)).status).toBe(200);
+  it("persists the five-failure limit and resets only the window after 15 minutes", async () => {
+    for (let i = 0; i < 5; i++) expect((await login({ username, password: "incorrect" }, root, now)).status).toBe(401);
+    expect(await login({ username, password }, root, now)).toMatchObject({ status: 429, retryAfter: 900 });
+    expect((await login({ username, password }, root, now + 900_000)).status).toBe(200);
+  });
+  it("does not count successful logins toward the lockout", async () => {
+    for (let i = 0; i < 8; i++) expect((await login({ username, password }, root, now)).status).toBe(200);
+  });
+  it("loads rate state written by the earlier TOTP version", async () => {
+    await mkdir(path.join(root, "auth"));
+    await writeFile(path.join(root, "auth/login.json"), JSON.stringify({ fingerprint: "old", windowStart: now, attempts: 3, lastStep: 99 }));
+    expect((await login({ username, password }, root, now)).status).toBe(200);
   });
   it("serializes concurrent login attempts and fails closed on crashed locks", async () => {
     await mkdir(path.join(root, "auth")); await writeFile(path.join(root, "auth/.login.lock"), "");
-    expect((await login({ password, token: token() }, root, now)).status).toBe(429);
+    expect((await login({ username, password }, root, now)).status).toBe(429);
   });
   it("refuses corrupt persisted rate state", async () => {
     await mkdir(path.join(root, "auth")); await writeFile(path.join(root, "auth/login.json"), "{}");
-    await expect(login({ password, token: token() }, root, now)).rejects.toThrow();
+    await expect(login({ username, password }, root, now)).rejects.toThrow();
   });
   it("fails closed without complete valid setup", async () => {
-    vi.stubEnv("AUTH_TOTP_SECRET", ""); expect(authConfig()).toBeNull();
-    expect((await login({ password, token: token() })).status).toBe(503);
+    vi.stubEnv("AUTH_USERNAME", ""); expect(authConfig()).toBeNull();
+    expect((await login({ username, password })).status).toBe(503);
   });
   it("rejects remote HTTP origins and bcrypt truncation", () => {
     vi.stubEnv("APP_ORIGIN", "http://public.example"); expect(authConfig()).toBeNull();
-    expect(LoginInputSchema.safeParse({ password: "é".repeat(37), token: "123456" }).success).toBe(false);
-    expect(LoginInputSchema.safeParse({ password, token: "123456", admin: true }).success).toBe(false);
+    expect(LoginInputSchema.safeParse({ username, password: "é".repeat(37) }).success).toBe(false);
+    expect(LoginInputSchema.safeParse({ username, password, admin: true }).success).toBe(false);
+    expect(LoginInputSchema.safeParse({ password }).success).toBe(false);
   });
 });
 describe("sessions and HTTP boundary", () => {
@@ -67,8 +74,8 @@ describe("sessions and HTTP boundary", () => {
     expect((await POST(req({ password: "a".repeat(3000) }))).status).toBe(413);
     expect((await POST(new Request("https://monitor.example/api/auth/login", { method: "POST", headers: { origin: "https://monitor.example" }, body: "x" }))).status).toBe(415);
   });
-  it("issues a Secure HttpOnly host-only SameSite=Strict cookie after both factors", async () => {
-    const response = await POST(req({ password, token: token(Date.now()) }));
+  it("issues a Secure HttpOnly host-only SameSite=Strict cookie after a valid login", async () => {
+    const response = await POST(req({ username, password }));
     expect(response.status).toBe(200); const cookie = response.headers.get("set-cookie")!;
     for (const flag of ["HttpOnly", "Secure", "SameSite=strict", "Path=/", "Max-Age=43200"]) expect(cookie).toContain(flag);
     expect(cookie).not.toContain("Domain="); expect(response.headers.get("cache-control")).toBe("no-store");
