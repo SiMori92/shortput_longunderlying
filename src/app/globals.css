@@ -99,3 +99,4 @@
 .login-form button:disabled { opacity:.6; }
 .login-form input { font-size:16px; }
 @media(max-width:639px) { .login-card { padding:24px; } .header-status { flex-wrap:wrap; } }
+#snapshot-editor { scroll-margin-top: 96px; }

@@ -33,8 +33,8 @@ export function PortfolioEditor({ initial, selected, date, authorized, symbol }:
   return <div className="page-stack portfolio-editor">
     {!authorized && <div className="notice warning">Saving requires a signed-in session. Sign in to save changes.</div>}
     <div aria-live="polite" role="status">{message}</div>
-    <form className="card" onSubmit={snapshot}>
-      <div className="section-heading"><h2><Wallet size={20} />Daily snapshot</h2><span className="chip">Entered NAV · {symbol}</span></div>
+    <form id="snapshot-editor" className="card" onSubmit={snapshot}>
+      <div className="section-heading"><h2><Wallet size={20} />{selected ? `Edit snapshot · ${date}` : "Daily snapshot"}</h2><span className="chip">Entered NAV · {symbol}</span></div>
       <fieldset disabled={busy} className="portfolio-fields"><div className="entry-grid">
         <label>Snapshot date<input required name="date" type="date" defaultValue={date} />{fieldError("date")}</label>
         <label>Account value ($)<input required name="accountValue" type="number" inputMode="decimal" step="0.01" min="0.01" defaultValue={selected?.accountValue ?? ""} />{fieldError("accountValue")}</label>

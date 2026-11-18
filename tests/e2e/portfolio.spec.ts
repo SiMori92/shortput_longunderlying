@@ -61,3 +61,17 @@ test("authorized portfolio entry, puts, persisted journal and four responsive wi
   await expect(page.getByRole("status")).toContainText("Snapshot saved");
   await page.reload(); await expect(page.getByText("No open puts entered",{exact:true})).toBeVisible();
 });
+test("edit snapshot in history opens that date in the editor", async ({ page, context }) => {
+  await context.setExtraHTTPHeaders({ Cookie: cookie() });
+  for (const [date, nav] of [["2026-11-16","100000"],["2026-11-17","90000"]]) {
+    await page.goto(`/portfolio?date=${date}`);
+    await page.getByLabel("Account value ($)",{exact:true}).fill(nav);
+    await page.getByRole("button",{name:"Save snapshot",exact:true}).click();
+    await expect(page.getByRole("status")).toContainText("Snapshot saved");
+  }
+  await page.goto("/portfolio");
+  await page.getByRole("row").filter({ hasText: "2026-11-16" }).getByRole("link",{name:"Edit snapshot"}).click();
+  await expect(page).toHaveURL(/date=2026-11-16#snapshot-editor$/);
+  await expect(page.getByRole("heading",{name:"Edit snapshot · 2026-11-16"})).toBeInViewport();
+  await expect(page.getByLabel("Account value ($)",{exact:true})).toHaveValue("100000");
+});
