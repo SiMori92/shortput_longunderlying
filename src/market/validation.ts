@@ -41,9 +41,16 @@ export function validateUpdate(symbol: string, existing: readonly Bar[], chart: 
     if (live) provisional = parsed.data; else complete.push(parsed.data);
   }
   const old = new Map(existing.map(b => [b.date, b])); let overlaps = 0;
+  const tail = existing.at(-1)?.date;
   for (const bar of complete) {
     const prior = old.get(bar.date); if (!prior) continue; overlaps++;
-    if (Math.abs(bar.close - prior.close) / Math.max(Math.abs(prior.close), 1e-12) > .005) issues.push(dataIssue("stitch", symbol, `Seed/Yahoo close mismatch >0.5% at ${bar.date}: ${prior.close} vs ${bar.close}`));
+    if (Math.abs(bar.close - prior.close) / Math.max(Math.abs(prior.close), 1e-12) <= .005) continue;
+    // Cboe indices (^VIX, ^IRX) settle after the cash close; a bar captured by the 16:20 final run
+    // can predate the official value. Only the newest stored index bar may be revised, visibly.
+    if (symbol.startsWith("^") && bar.date === tail) {
+      issues.push(dataIssue("stitch", symbol, `Revised unsettled index close at ${bar.date}: ${prior.close} → ${bar.close}`, false));
+      old.set(bar.date, bar);
+    } else issues.push(dataIssue("stitch", symbol, `Seed/Yahoo close mismatch >0.5% at ${bar.date}: ${prior.close} vs ${bar.close}`));
   }
   if (existing.length && complete.some(b => b.date > existing.at(-1)!.date) && !overlaps) issues.push(dataIssue("stitch", symbol, "Yahoo update has no overlap with stored history"));
   // Keep immutable seed/previous accepted overlap values; append only new days.

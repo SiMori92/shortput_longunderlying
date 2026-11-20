@@ -39,6 +39,14 @@ it("checks 0.5% stitching and refuses a non-overlapping extension", () => {
   expect(result.acceptable).toBe(true); expect(result.stored!.bars[0]!.close).toBe(100);
   expect(validateUpdate("SOXL", [bar("2026-11-16")], chart([bar("2026-11-17")]), options).acceptable).toBe(false);
 });
+it("revises only the newest stored Cboe index bar, non-blocking; older index or ETF mismatches still block", () => {
+  const vix = validateUpdate("^VIX", [bar("2026-11-13", 20), bar("2026-11-16", 29.02)], chart([bar("2026-11-13", 20), bar("2026-11-16", 28.44), bar("2026-11-17")], "^VIX"), options);
+  expect(vix.acceptable).toBe(true);
+  expect(vix.issues.some(i => i.code === "stitch" && !i.blocking)).toBe(true);
+  expect(vix.stored!.bars.find(b => b.date === "2026-11-16")!.close).toBe(28.44);
+  expect(validateUpdate("^VIX", [bar("2026-11-13", 20), bar("2026-11-16")], chart([bar("2026-11-13", 21), bar("2026-11-16"), bar("2026-11-17")], "^VIX"), options).acceptable).toBe(false);
+  expect(validateUpdate("SOXL", [bar("2026-11-16")], chart([bar("2026-11-16", 101), bar("2026-11-17")]), options).acceptable).toBe(false);
+});
 it("flags missing sessions, stale data, >40% reference moves, duplicates and null quotes", () => {
   const missing = validateUpdate("SOXL", [], chart([bar("2026-11-13"), bar("2026-11-17")]), options);
   expect(missing.issues.some(i => i.code === "missing")).toBe(true);
