@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { nextArtwork, type Artwork } from "@/ui/artwork";
+import { artworkCaption, fallbackArtwork, nextArtwork, type Artwork } from "@/ui/artwork";
 
 export function ArtworkHeader() {
   const pathname = usePathname();
@@ -9,16 +9,19 @@ export function ArtworkHeader() {
   useEffect(() => {
     let disposed = false;
     let pending: HTMLImageElement | null = null;
-    function select() {
+    function load(art: Artwork, onError: () => void) {
       if (pending) { pending.onload = null; pending.onerror = null; }
-      let storage: Storage | undefined;
-      try { storage = window.sessionStorage; } catch { /* Private browsing can deny storage. */ }
-      const next = nextArtwork(storage);
       const image = new Image();
       pending = image;
-      image.onload = () => { if (!disposed) setArtwork(next); };
-      image.onerror = () => { if (!disposed) setArtwork(null); };
-      image.src = next.image;
+      image.onload = () => { if (!disposed) setArtwork(art); };
+      image.onerror = () => { if (!disposed) onError(); };
+      image.src = art.image;
+    }
+    function select() {
+      let storage: Storage | undefined;
+      try { storage = window.sessionStorage; } catch { /* Private browsing can deny storage. */ }
+      // Remote (Wikimedia) image first; on failure the one locally stored work; if that also fails, a neutral header.
+      load(nextArtwork(storage), () => load(fallbackArtwork, () => setArtwork(null)));
     }
     // Strict Mode's discarded mount must not consume a work.
     const timer = window.setTimeout(select, 0);
@@ -33,6 +36,6 @@ export function ArtworkHeader() {
   }, [pathname]);
   return <figure className="artwork-header">
     <div className="artwork-image" aria-hidden="true" style={artwork ? { backgroundImage: `url("${artwork.image}")` } : undefined} />
-    <figcaption className="artwork-caption">{artwork ? <a href={artwork.source} target="_blank" rel="noopener noreferrer" aria-label={`${artwork.artist}, ${artwork.title}, ${artwork.year} — artwork reference (opens in a new tab)`}>{artwork.artist} · {artwork.title}, {artwork.year}</a> : "Art collection · public domain"}</figcaption>
+    <figcaption className="artwork-caption">{artwork ? <a href={artwork.source} target="_blank" rel="noopener noreferrer" aria-label={`${artworkCaption(artwork)} — explore on ${artwork.sourceLabel} (opens in a new tab)`}>{artworkCaption(artwork)}</a> : "Art collection · public domain"}</figcaption>
   </figure>;
 }

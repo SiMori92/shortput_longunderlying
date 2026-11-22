@@ -29,8 +29,15 @@ test("filters and rerenders keep the same painting; refresh advances it", async 
   await expect(caption).not.toHaveAttribute("href", original!);
 });
 
+test("a failed remote painting falls back to the stored work", async ({ page }) => {
+  await page.route(/wikimedia\.org/, route => route.abort());
+  await page.goto("/gate");
+  await expect(page.getByRole("heading", { name: "Gate", exact: true })).toBeVisible();
+  await expect(page.locator(".artwork-caption a")).toHaveText("Claude Monet · Water Lilies, 1906");
+});
+
 test("failed artwork keeps the header usable without a misleading caption", async ({ page }) => {
-  await page.route("**/art/*.jpg", route => route.abort());
+  await page.route(/wikimedia\.org|\/art\/.*\.jpg/, route => route.abort());
   await page.goto("/gate");
   await expect(page.getByRole("heading", { name: "Gate", exact: true })).toBeVisible();
   await expect(page.locator(".artwork-caption")).toHaveText("Art collection · public domain");

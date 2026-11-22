@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
-import { ARTWORK_STORAGE_KEY, artworks, createArtworkShuffler } from "../src/ui/artwork";
+import catalog from "../src/ui/artwork-catalog.json";
+import { ARTWORK_STORAGE_KEY, artworkCaption, artworks, createArtworkShuffler, fallbackArtwork } from "../src/ui/artwork";
 
 function storage(initial: string | null = null) {
   let value = initial;
@@ -10,11 +11,17 @@ function storage(initial: string | null = null) {
 
 describe("header artwork", () => {
   it("shows each work once per cycle with no immediate cycle-boundary repeat", () => {
-    const next = createArtworkShuffler(() => 0.5);
-    const ids = Array.from({ length: artworks.length * 8 }, () => next().id);
-    for (let i = 0; i < ids.length; i += artworks.length) {
-      expect(new Set(ids.slice(i, i + artworks.length)).size).toBe(artworks.length);
-      if (i) expect(ids[i]).not.toBe(ids[i - 1]);
+    const next = createArtworkShuffler();
+    let last: string | null = null;
+    for (let cycle = 0; cycle < 20; cycle++) {
+      const seen = new Set<string>();
+      for (let visit = 0; visit < artworks.length; visit++) {
+        const id = next().id;
+        expect(id).not.toBe(last);
+        seen.add(id);
+        last = id;
+      }
+      expect(seen.size).toBe(artworks.length);
     }
   });
 
@@ -23,12 +30,12 @@ describe("header artwork", () => {
     const ids = Array.from({ length: artworks.length }, () => createArtworkShuffler()(saved).id);
     expect(new Set(ids).size).toBe(artworks.length);
     expect(JSON.parse(saved.getItem()!).remaining).toEqual([]);
+    expect(createArtworkShuffler(() => 0.999)(saved).id).not.toBe(ids.at(-1));
   });
 
-  it.each(["broken JSON", "null", JSON.stringify({ remaining: ["unknown"], last: null }), JSON.stringify({ remaining: [artworks[0].id, artworks[0].id], last: null }), JSON.stringify({ remaining: [artworks[0].id], last: artworks[0].id })])("recovers from damaged stored state: %s", raw => {
+  it.each(["broken JSON", "null", JSON.stringify({ remaining: ["unknown"], last: null }), JSON.stringify({ remaining: [artworks[0]!.id, artworks[0]!.id], last: null }), JSON.stringify({ remaining: [artworks[0]!.id], last: artworks[0]!.id }), JSON.stringify({ remaining: [], last: "monet-japanese-footbridge" })])("recovers from damaged or outdated stored state: %s", raw => {
     const saved = storage(raw);
-    const next = createArtworkShuffler();
-    expect(artworks).toContain(next(saved));
+    expect(artworks).toContain(createArtworkShuffler()(saved));
     expect(JSON.parse(saved.getItem()!).remaining).toHaveLength(artworks.length - 1);
   });
 
@@ -38,11 +45,28 @@ describe("header artwork", () => {
     expect(new Set(artworks.map(() => next(denied).id)).size).toBe(artworks.length);
   });
 
-  it("ships local images with HTTPS attribution and a product-specific key", () => {
+  it("catalogues at least 100 public-domain works as Wikimedia URLs with Google Arts & Culture pages (W-79)", () => {
     expect(ARTWORK_STORAGE_KEY).toMatch(/^strategy-monitor-/);
+    expect(artworks.length).toBeGreaterThanOrEqual(100);
+    expect(new Set(artworks.map(a => a.id)).size).toBe(artworks.length);
+    expect(new Set(artworks.map(a => a.source)).size).toBe(artworks.length);
     for (const art of artworks) {
-      expect(existsSync(path.join(process.cwd(), "public", art.image))).toBe(true);
-      expect(art.source.startsWith("https://")).toBe(true);
+      const image = new URL(art.image);
+      expect(image.protocol).toBe("https:");
+      expect(image.hostname).toMatch(/^(upload|thumb)\.wikimedia\.org$/);
+      expect(new URL(art.source).hostname).toBe("artsandculture.google.com");
+      expect(art.sourceLabel).toBe("Google Arts & Culture");
+      expect(art.title).toBeTruthy();
+      expect(art.title).not.toMatch(/QS:/);
+      expect(art.artist).toBeTruthy();
+      expect(artworkCaption(art)).not.toMatch(/,\s*$/);
     }
+    for (const work of catalog.works) expect(work.license).toBe("Public domain");
+  });
+
+  it("keeps exactly one local JPEG as the offline fallback", () => {
+    const bytes = readFileSync(path.join(process.cwd(), "public", fallbackArtwork.image));
+    expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+    expect(new URL(fallbackArtwork.source).hostname).toBe("artsandculture.google.com");
   });
 });

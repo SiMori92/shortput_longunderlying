@@ -18,7 +18,8 @@
     "fixtures:export": "sh tools/export-fixtures.sh",
     "run:now": "tsx tools/run.ts",
     "auth:setup": "tsx tools/auth-setup.ts",
-    "smoke": "tsx tools/smoke-production.ts"
+    "smoke": "tsx tools/smoke-production.ts",
+    "art:catalog": "node tools/build-art-catalog.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
