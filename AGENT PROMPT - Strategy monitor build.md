@@ -8,17 +8,17 @@ You are building a private web application. It monitors a set of underlyings and
 
 | Path | What it is |
 |---|---|
-| `/Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp/PLAN - Strategy monitor web app.md` | The work plan (revision 3, already aligned with this brief). It defines features, pages, the SPAX checklist, milestones, testing and risks. **Follow it; if the two ever disagree, this brief wins.** |
-| `/Users/simpochiu/Documents/Invest-Short_Put_Quant/Backtest/Backtest_app/v2_engine/short_put_engine.py` | Python reference: data loading, features, Black-Scholes, skew, strike solver, metrics |
+| `/Users/simpochiu/Projects/Invest-Short_Put_Quant/WebApp/PLAN - Strategy monitor web app.md` | The work plan (revision 3, already aligned with this brief). It defines features, pages, the SPAX checklist, milestones, testing and risks. **Follow it; if the two ever disagree, this brief wins.** |
+| `/Users/simpochiu/Projects/Invest-Short_Put_Quant/Backtest/Backtest_app/v2_engine/short_put_engine.py` | Python reference: data loading, features, Black-Scholes, skew, strike solver, metrics |
 | `.../v2_engine/risk_v3.py` | Python reference: the `run3` daily loop, the `C3` config, `V3_BALANCED` |
 | `.../v2_engine/riskcut_v3.py` | Python reference for the **V3.1 risk-cut** variant: the gate swap with `GATE`, `MULT` and `PUTOK` columns |
 | `.../v2_engine/data_merged_2026-11-16/` | Daily OHLC CSVs to the 16 Nov 2026 close: SOXL and SOXX from 2010, SPCX from 12 Jun 2026, plus SPY, ^VIX, ^IRX. Use these as seed history. |
-| `/Users/simpochiu/Documents/Invest-Short_Put_Quant/Strategy/Strategy v3 - execution guide.html` | The current static guide. The app is its live, visual successor; reuse its structure and worked examples. |
-| `/Users/simpochiu/Documents/Invest-Short_Put_Quant/Strategy/Strategy v3 - Risk control upgrade (2026-11-17).md` | V3 rule card (V3.1 = V3 plus amendment 1, below) |
+| `/Users/simpochiu/Projects/Invest-Short_Put_Quant/Strategy/Strategy v3 - execution guide.html` | The current static guide. The app is its live, visual successor; reuse its structure and worked examples. |
+| `/Users/simpochiu/Projects/Invest-Short_Put_Quant/Strategy/Strategy v3 - Risk control upgrade (2026-11-17).md` | V3 rule card (V3.1 = V3 plus amendment 1, below) |
 
 **The Python code is the source of truth for the strategy math.**
 - Read it; do not modify anything under `Backtest/` or `Strategy/`.
-- Build everything inside `/Users/simpochiu/Documents/Invest-Short_Put_Quant/WebApp/`. The plan file stays where it is.
+- Build everything inside `/Users/simpochiu/Projects/Invest-Short_Put_Quant/WebApp/`. The plan file stays where it is.
 
 ## 1. Stack and hard constraints (these override the plan's Python/FastAPI/SQLite choices)
 
