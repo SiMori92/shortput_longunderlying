@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { requirePageSession } from "@/auth/page";
 import path from "node:path";
 import Link from "next/link";
@@ -35,7 +36,7 @@ export default async function Portfolio({ searchParams }: { searchParams: Promis
   const dd = selected && peak ? selected.accountValue / peak - 1 : null;
   const authorized = authenticated(new Request("http://localhost/portfolio", { headers: requestHeaders }));
   return <div className="page-stack">
-    <div className="page-title"><div><div className="eyebrow">ENTERED ACCOUNT · {symbol}</div><h1>Portfolio</h1></div><span className="chip"><Wallet size={16} />{date}</span></div>
+    <PageHeading eyebrow={<>ENTERED ACCOUNT · {symbol}</>} title={<>Portfolio</>} description="Record account snapshots and journal your execution decisions." action={<span className="chip"><Wallet size={16} />{date}</span>} />
     <div className="notice">{symbol} has its own snapshots and journal. Snapshot date is the close being recorded. Saving does not rewrite stored recommendations.</div>
     {selected && <><div className="kpi-grid">
       <div className="card"><span className="muted">Entered equity</span><h2><Num value={selected.accountValue} label="Entered account value" formula="Manually entered NAV; already includes account liabilities" format="money" /></h2></div>

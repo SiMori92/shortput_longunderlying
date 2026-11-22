@@ -1,8 +1,11 @@
 import { expect, test, regressionCookie } from "./authenticated";
 import { readFile, rm } from "node:fs/promises";
 import { atomicWrite } from "../../src/data/store";
+import { JournalSchema, PortfolioEntriesSchema } from "../../src/schemas/portfolio";
 import { RunResultSchema } from "../../src/schemas/run";
 test.beforeAll(async () => {
+  await atomicWrite(".e2e-data/portfolio/entries.json", PortfolioEntriesSchema, []);
+  await atomicWrite(".e2e-data/portfolio/journal.json", JournalSchema, []);
   await atomicWrite(".e2e-data/runs/last-attempt.json", RunResultSchema, JSON.parse(await readFile("tests/fixtures/market/blocked-run.json", "utf8")));
 });
 test.afterAll(async () => { await rm(".e2e-data/runs/last-attempt.json", { force: true }); });

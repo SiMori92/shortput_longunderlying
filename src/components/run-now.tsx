@@ -17,5 +17,5 @@ export function RunNow({ symbol }: { symbol: StrategySymbol }) {
     } catch { setMessage("Run unavailable. Previous valid final retained."); }
     finally { setBusy(false); }
   }
-  return <div className="run-now"><button className="icon-button" aria-label="Run now" disabled={busy} title="Authenticated session required" onClick={run}><RefreshCw size={18} className={busy ? "spin" : undefined} /></button>{message && <div className="run-message" role="status"><span>{message}</span><button aria-label="Dismiss run message" onClick={() => setMessage("")}>×</button></div>}</div>;
+  return <div className="run-now"><button className="button primary run-button" aria-label="Run now" aria-busy={busy} disabled={busy} title="Generate updated model analysis" onClick={run}><RefreshCw size={18} className={busy ? "spin" : undefined} /><span className="run-button-label">{busy ? "Running…" : "Run now"}</span></button>{message && <div className="run-message" role="status"><span>{message}</span><button aria-label="Dismiss run message" onClick={() => setMessage("")}>×</button></div>}</div>;
 }
