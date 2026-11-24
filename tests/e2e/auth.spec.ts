@@ -21,7 +21,7 @@ test("account name + password login, secure browser cookie and logout", async ({
   await page.goto("/portfolio"); await expect(page.getByRole("button",{name:"Save snapshot",exact:true})).toBeEnabled();
   // Ticker switcher: every page follows the selection, and it survives navigation.
   await page.getByRole("group",{name:"Ticker"}).getByRole("button",{name:"SPAX",exact:true}).click();
-  await expect(page.getByText("ENTERED ACCOUNT · SPAX",{exact:true})).toBeVisible();
+  await expect(page.getByText("Entered account · SPAX",{exact:true})).toBeVisible();
   await page.goto("/"); await expect(page.getByText("V3.1 · SPAX vs SPCX",{exact:true})).toBeVisible();
   await page.goto("/spax"); await expect(page).toHaveURL(/\/monitor$/); await expect(page.getByRole("heading",{name:"SPAX monitor",exact:true})).toBeVisible();
   await page.getByRole("group",{name:"Ticker"}).getByRole("button",{name:"SOXL",exact:true}).click();

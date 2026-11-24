@@ -34,6 +34,7 @@ describe("garden study contrast", () => {
     ["chart ink on chart surface", "--chart-ink", "--chart-surface"],
     ["chart secondary ink on chart surface", "--chart-ink-2", "--chart-surface"],
     ["surface text on red-earth footer", "--color-surface", "--d4"],
+    ...["--seq-200", "--seq-300", "--seq2-100", "--seq2-200", "--div-mid"].map(bg => [`chart ink on heatmap ${bg}`, "--chart-ink", bg] as [string, string, string]),
   ];
   it.each(text)("%s reaches 4.5:1", (_, fg, bg) => expect(ratio(fg, bg)).toBeGreaterThanOrEqual(4.5));
 
