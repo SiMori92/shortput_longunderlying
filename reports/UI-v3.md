@@ -13,8 +13,8 @@ Workbook: `UI_DESIGN_WORKBOOK.html` v3.0 · Plan: `PLAN - UI revamp to garden st
 
 ## Deliberate departures
 
-1. **Mobile navigation (≤767px) stays a bottom tab bar**, not the workbook's icon rail or drawer. It is better for one-handed phone checks, every target is ≥44px and each link keeps its accessible name. (Plan D2.)
-2. **Chart series colours** are not defined by the workbook. Series 1 = garden violet `--color-action`, series 2 = `--chart-2` blue-grey, threshold/reference = `--color-muted` dashed. Gate bands use state backgrounds, never decorative accents. (Plan D3.)
+1. **Mobile navigation (≤650px) stays a bottom tab bar**, not the workbook's icon rail or drawer. It is better for one-handed phone checks, every target is ≥44px and each link keeps its accessible name. (Plan D2.)
+Chart colours are no longer a departure: the workbook (updated 2026-11-25) defines them, and the app uses its tokens.
 
 ## Baseline (Phase 0)
 

@@ -20,6 +20,14 @@
     --color-danger:#8a2a1d; --color-danger-bg:#f8e4dc; --color-active:#443c6b; --color-active-bg:#ebe7f3;
     --color-neutral:#4b5244; --color-neutral-bg:#eae6d8;
     --d1:#d1a93a; --d2:#9690c4; --d3:#7f9a7a; --d4:#a2432a;
+    /* Chart colours — validated on the chalk surface #faf6ea (dataviz six checks). Fixed order, never cycled. */
+    --series-1:#5a52a8; --series-2:#2a8c62; --series-3:#c4961c; --series-4:#3b82b4;
+    --series-5:#b4472b; --series-6:#a77cc6; --series-7:#8a9a22; --series-8:#d0688a;
+    --seq-100:#dfe0ff; --seq-200:#c0bfff; --seq-300:#a29ff5; --seq-400:#8782dd; --seq-500:#6c66b9; --seq-600:#555192; --seq-700:#3e3d65;
+    --seq2-300:#f4896e; --seq2-400:#da694c; --seq2-500:#b54f35; --seq2-600:#8f3f2a; --seq2-700:#643225; --seq2-200:#ffae98; --seq2-100:#ffd6c7;
+    --div-mid:#e3e1d8;
+    --status-good:#1d6b2a; --status-warning:#ecc000; --status-serious:#d8601c; --status-critical:#a51d2d;
+    --chart-surface:#faf6ea; --chart-grid:#e4e1d2; --chart-axis:#b9bba8; --chart-ink:#2c2a33; --chart-ink-2:#4b5244;
     --shadow:0 1px 0 #ffffff80 inset,0 10px 24px -10px #2c2a3340,0 2px 6px #2c2a3314;
     --radius-panel:12px 14px 11px 15px; --radius-header:18px; --radius-button:8px 10px 8px 9px;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -262,6 +270,38 @@
     box-shadow:0 -3px 0 var(--d1) inset;}
   .toast.show{opacity:1;}
 
+
+  /* Charts */
+  .series-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;}
+  .series-grid .s{background:var(--color-surface);border:1px solid #7b806c80;border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+  .series-grid .s i{display:block;height:40px;}
+  .series-grid .s span{display:block;padding:6px 8px;font-size:11px;line-height:1.35;color:var(--color-muted);}
+  .series-grid .s b{display:block;color:var(--color-text);font-size:12px;}
+  .series-grid .s code{font-size:10.5px;}
+  .ramp{display:flex;border-radius:8px;overflow:hidden;height:30px;box-shadow:0 0 0 1px #2c2a3326;}
+  .ramp i{flex:1;}
+  .ramp-label{display:flex;justify-content:space-between;font-size:11px;color:var(--color-muted);margin:4px 0 14px;}
+  .status-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .status-chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--chart-ink);padding:5px 10px 5px 7px;border-radius:8px;background:var(--color-surface);border:1px solid #7b806c66;}
+  .status-chip svg{width:16px;height:16px;flex:none;}
+  .chart-card{background:var(--chart-surface);border:1px solid #7b806c80;border-radius:var(--radius-panel);box-shadow:var(--shadow);padding:18px 18px 12px;}
+  .chart-card h4{margin:0;font-size:14px;font-weight:600;color:var(--chart-ink);}
+  .chart-card .sub{font-size:12px;color:var(--chart-ink-2);margin:2px 0 10px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--chart-ink);margin-bottom:6px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:14px;height:3px;border-radius:2px;display:inline-block;}
+  .chart-box{position:relative;}
+  .chart-box svg{display:block;width:100%;height:auto;overflow:visible;}
+  .chart-box svg:focus-visible{outline:3px solid var(--color-focus);outline-offset:4px;}
+  .chart-tip{position:absolute;pointer-events:none;background:var(--color-surface);color:var(--chart-ink);border:1px solid #2c2a3326;border-radius:8px;
+    box-shadow:0 8px 20px -8px #2c2a3366;padding:8px 10px;font-size:12px;min-width:140px;opacity:0;transition:opacity .1s;z-index:2;}
+  .chart-tip.on{opacity:1;}
+  .chart-tip .t{font-weight:600;margin-bottom:4px;}
+  .chart-tip .r{display:flex;align-items:center;gap:6px;justify-content:space-between;}
+  .chart-tip .r span{display:inline-flex;align-items:center;gap:6px;color:var(--chart-ink-2);}
+  .chart-tip .r i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .chart-tip .r b{font-variant-numeric:tabular-nums;font-weight:600;}
+  @media (max-width:900px){.series-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
   @media (max-width:900px){
     .hero{grid-template-columns:minmax(0,1fr);padding:24px;}
     .triptych{min-height:260px;}
@@ -404,6 +444,44 @@
     <h3 class="sub">Decorative accents (no status meaning)</h3>
     <p class="note" style="margin:0 0 10px">Assigned by position: ochre contour, lavender, sage, red earth. Editing these repaints the metric bands and the painted hero and footer. The wavy contour rules are fixed ochre, and the paintings stay the reference.</p>
     <div class="swatches" id="decoSwatches"></div>
+    <h3 class="sub">Chart colours</h3>
+    <p class="note" style="margin:0 0 12px;max-width:80ch">Charts take their own tokens, separate from the decorative accents above. The eight series hues come from the same three paintings, deepened or saturated until they work as data colours. They are assigned in this fixed order, slot 1 first, and never cycled. A ninth series folds into “Other”. The colour follows the entity: a filter that removes a series does not repaint the rest. Validated on the chalk chart surface: worst neighbouring pair ΔE 10.6 for colour-blind vision (target ≥ 8) and 19.8 for normal vision (floor 15). Scatter plots, maps and small multiples, where any two colours can touch, use only slots 1–3.</p>
+    <div class="series-grid" id="seriesGrid"></div>
+    <p class="note" style="margin-top:8px">Ochre (2.5:1) and olive (2.9:1) fall below 3:1 on chalk, so any chart that uses slot 3 or 7 shows direct labels or a table view. Series text — values, labels, legends — stays in ink; the colour sits beside it as a mark.</p>
+
+    <div class="grid split" style="grid-template-columns:1fr 1fr;margin-top:14px;gap:22px">
+      <div>
+        <p class="note" style="margin:0 0 6px"><strong style="color:var(--color-text)">Sequential</strong> · magnitude, one hue (garden violet), light to dark</p>
+        <div class="ramp" aria-hidden="true"><i style="background:var(--seq-100)"></i><i style="background:var(--seq-200)"></i><i style="background:var(--seq-300)"></i><i style="background:var(--seq-400)"></i><i style="background:var(--seq-500)"></i><i style="background:var(--seq-600)"></i><i style="background:var(--seq-700)"></i></div>
+        <div class="ramp-label"><span>100 · near zero</span><span>700 · most</span></div>
+        <p class="note" style="margin:0 0 6px"><strong style="color:var(--color-text)">Second sequential</strong> · red earth, only when two magnitude scales appear together</p>
+        <div class="ramp" aria-hidden="true"><i style="background:var(--seq2-100)"></i><i style="background:var(--seq2-200)"></i><i style="background:var(--seq2-300)"></i><i style="background:var(--seq2-400)"></i><i style="background:var(--seq2-500)"></i><i style="background:var(--seq2-600)"></i><i style="background:var(--seq2-700)"></i></div>
+        <div class="ramp-label"><span>100</span><span>700</span></div>
+      </div>
+      <div>
+        <p class="note" style="margin:0 0 6px"><strong style="color:var(--color-text)">Diverging</strong> · polarity, violet ↔ red earth with a grey middle</p>
+        <div class="ramp" aria-hidden="true"><i style="background:var(--seq-600)"></i><i style="background:var(--seq-400)"></i><i style="background:var(--seq-200)"></i><i style="background:var(--div-mid)"></i><i style="background:var(--seq2-200)"></i><i style="background:var(--seq2-400)"></i><i style="background:var(--seq2-600)"></i></div>
+        <div class="ramp-label"><span>below baseline</span><span>no change</span><span>above baseline</span></div>
+        <p class="note" style="margin:0 0 6px"><strong style="color:var(--color-text)">Chart status</strong> · reserved, always icon + label, never a series</p>
+        <div class="status-row">
+          <span class="status-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="var(--status-good)"/><path d="M4.8 8.2l2.1 2.1 4.3-4.4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Good</span>
+          <span class="status-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l7 12.5H1z" fill="var(--status-warning)"/><path d="M8 6v3.6M8 11.6v.1" stroke="#2c2a33" stroke-width="1.7" stroke-linecap="round"/></svg>Warning</span>
+          <span class="status-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="var(--status-serious)"/><path d="M8 4.6v4.2M8 11.2v.1" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Serious</span>
+          <span class="status-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 1.5h6L14.5 5v6L11 14.5H5L1.5 11V5z" fill="var(--status-critical)"/><path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>Critical</span>
+        </div>
+        <p class="note" style="margin-top:8px">These are chart marks for good/bad values (error rate, pass/fail), not the badge tokens. Their colour stays at least ΔE 8 from every series. If a series means good or bad it wears status; if it is only “series 4” it wears categorical — never both in one chart.</p>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-top:16px">
+      <h4 id="demoChartTitle">Weekly runs by workspace</h4>
+      <p class="sub">Last 12 weeks · sample data · slots 1–3</p>
+      <div class="legend" id="demoLegend"></div>
+      <div class="chart-box" id="demoChart"></div>
+      <details class="row-detail" style="margin-top:6px"><summary>Show as table</summary><div class="table-wrap" style="margin-top:8px"><table class="data" id="demoTable"></table></div></details>
+    </div>
+    <p class="note" style="margin-top:8px">2px lines, recessive grid, one axis, direct labels at the line ends plus a legend. Hover, or focus the chart and use the arrow keys, for a crosshair with every value. The workbook has no dark mode, so these steps are validated for the light chalk surface only; a dark theme would need its own validated steps, not an automatic flip.</p>
+
     <h3 class="sub">Live contrast check (WCAG AA)</h3>
     <div class="panel" style="padding:8px 14px">
       <table class="contrast-table" id="contrastTable" aria-live="polite">
@@ -795,7 +873,49 @@
     for(var t=0;t<tcount;t++){stroke(ctx,r()*W,r()*H,-.5+r()*.4,5+r()*5,1.8+r()*1.2,pick(r,ticks));}
     ctx.globalAlpha=1;
   }
-  function repaint(){paintField(document.getElementById("heroPaint"),"hero");paintField(document.getElementById("footPaint"),"foot");}
+
+  /* Chart colours — reference swatches and a sample line chart. */
+  var SERIES=[["Garden violet","asylum garden mountains","#5a52a8"],["Viridian","Brabant cloud green","#2a8c62"],["Ochre","Brabant contour","#c4961c"],["Clichy blue","Clichy façade","#3b82b4"],["Red earth","asylum garden ground","#b4472b"],["Lilac","Clichy sky","#a77cc6"],["Olive","garden foliage","#8a9a22"],["Rose","Brabant flowers","#d0688a"]];
+  (function(){
+    var g=document.getElementById("seriesGrid");if(!g)return;
+    SERIES.forEach(function(sr,i){var d=document.createElement("div");d.className="s";
+      d.innerHTML='<i style="background:var(--series-'+(i+1)+')"></i><span><b>'+(i+1)+' · '+sr[0]+'</b>'+sr[1]+'<br><code>'+sr[2]+'</code></span>';g.appendChild(d);});
+  })();
+  function drawDemoChart(){
+    var box=document.getElementById("demoChart");if(!box)return;
+    var weeks=["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"];
+    var data=[{name:"Support",v:[42,48,45,53,58,55,61,66,63,70,74,78]},
+              {name:"Billing",v:[30,28,34,33,38,41,39,44,47,45,50,52]},
+              {name:"Onboarding",v:[12,15,14,19,18,23,26,25,29,31,30,35]}];
+    var W=Math.max(300,box.clientWidth),H=Math.round(Math.min(300,Math.max(220,W*.34)));
+    var m={l:34,r:W<520?64:96,t:10,b:26},iw=W-m.l-m.r,ih=H-m.t-m.b,ymax=80;
+    var x=function(i){return m.l+i*iw/(weeks.length-1);},y=function(v){return m.t+ih-v/ymax*ih;};
+    var ns="http://www.w3.org/2000/svg",out='';
+    for(var t=0;t<=ymax;t+=20){out+='<line x1="'+m.l+'" x2="'+(m.l+iw)+'" y1="'+y(t)+'" y2="'+y(t)+'" stroke="'+(t===0?"var(--chart-axis)":"var(--chart-grid)")+'" stroke-width="1"/>';
+      out+='<text x="'+(m.l-8)+'" y="'+(y(t)+4)+'" text-anchor="end" font-size="11" fill="var(--chart-ink-2)">'+t+'</text>';}
+    weeks.forEach(function(w,i){if(W<520&&i%2)return;out+='<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="var(--chart-ink-2)">'+w+'</text>';});
+    data.forEach(function(sr,k){var d=sr.v.map(function(v,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1);}).join("");
+      out+='<path d="'+d+'" fill="none" stroke="var(--series-'+(k+1)+')" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      var lv=sr.v[sr.v.length-1];out+='<circle cx="'+x(11)+'" cy="'+y(lv)+'" r="4" fill="var(--series-'+(k+1)+')" stroke="var(--chart-surface)" stroke-width="2"/>';
+      out+='<text x="'+(x(11)+10)+'" y="'+(y(lv)+4)+'" font-size="12" fill="var(--chart-ink)"><tspan font-weight="600">'+lv+'</tspan> '+sr.name+'</text>';});
+    out+='<g id="cross" style="display:none"><line id="crossLine" y1="'+m.t+'" y2="'+(m.t+ih)+'" stroke="var(--chart-ink-2)" stroke-width="1" stroke-dasharray="3 3"/>'+
+      data.map(function(_,k){return '<circle class="cdot" r="5" fill="var(--series-'+(k+1)+')" stroke="var(--chart-surface)" stroke-width="2"/>';}).join("")+'</g>';
+    out+='<rect id="hit" x="'+m.l+'" y="'+m.t+'" width="'+iw+'" height="'+ih+'" fill="transparent"/>';
+    box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" tabindex="0" role="img" aria-labelledby="demoChartTitle" aria-describedby="demoChartDesc">'+out+'</svg><div class="chart-tip" id="chartTip" aria-hidden="true"></div><p id="demoChartDesc" style="position:absolute;left:-9999px">Line chart. Support rises from 42 to 78 runs, Billing from 30 to 52, Onboarding from 12 to 35 over 12 weeks. Use arrow keys to read each week.</p>';
+    var svg=box.querySelector("svg"),cross=svg.querySelector("#cross"),line=svg.querySelector("#crossLine"),dots=svg.querySelectorAll(".cdot"),tip=box.querySelector("#chartTip"),cur=-1;
+    function show(i){cur=i;cross.style.display="";line.setAttribute("x1",x(i));line.setAttribute("x2",x(i));
+      data.forEach(function(sr,k){dots[k].setAttribute("cx",x(i));dots[k].setAttribute("cy",y(sr.v[i]));});
+      tip.innerHTML='<div class="t">Week '+(i+1)+'</div>'+data.map(function(sr,k){return '<div class="r"><span><i style="background:var(--series-'+(k+1)+')"></i>'+sr.name+'</span><b>'+sr.v[i]+'</b></div>';}).join("");
+      var sc=box.clientWidth/W,left=x(i)*sc+14;if(left+160>box.clientWidth)left=x(i)*sc-14-tip.offsetWidth;tip.style.left=left+"px";tip.style.top=(m.t*sc)+"px";tip.classList.add("on");}
+    function hide(){cross.style.display="none";tip.classList.remove("on");}
+    svg.addEventListener("mousemove",function(e){var r=svg.getBoundingClientRect(),px=(e.clientX-r.left)*W/r.width;var i=Math.round((px-m.l)/iw*(weeks.length-1));show(Math.max(0,Math.min(11,i)));});
+    svg.addEventListener("mouseleave",hide);svg.addEventListener("blur",hide);
+    svg.addEventListener("keydown",function(e){if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();var i=cur<0?0:cur+(e.key==="ArrowRight"?1:-1);show(Math.max(0,Math.min(11,i)));}else if(e.key==="Escape"){hide();}});
+    var lg=document.getElementById("demoLegend");lg.innerHTML=data.map(function(sr,k){return '<span><i style="background:var(--series-'+(k+1)+')"></i>'+sr.name+'</span>';}).join("");
+    var tb=document.getElementById("demoTable");tb.innerHTML='<thead><tr><th>Week</th>'+data.map(function(sr){return '<th>'+sr.name+'</th>';}).join("")+'</tr></thead><tbody>'+
+      weeks.map(function(w,i){return '<tr><td>'+w+'</td>'+data.map(function(sr){return '<td class="num">'+sr.v[i]+'</td>';}).join("")+'</tr>';}).join("")+'</tbody>';
+  }
+  function repaint(){paintField(document.getElementById("heroPaint"),"hero");paintField(document.getElementById("footPaint"),"foot");drawDemoChart();}
   var rpTimer=null;function repaintSoon(){clearTimeout(rpTimer);rpTimer=setTimeout(repaint,120);}
   var lastW=window.innerWidth;
   window.addEventListener("resize",function(){if(window.innerWidth!==lastW){lastW=window.innerWidth;repaintSoon();}});
@@ -826,6 +946,8 @@
   document.getElementById("copyCss").addEventListener("click",function(){
     var lines=["/* Garden study — asylum garden 1889, Brabant 1890, a touch of Clichy 1887. Accents have no status meaning; red earth is not failure. */",":root{"];
     TOKENS.concat(DECO).forEach(function(t){lines.push("  "+t.v+": "+getVal(t.v)+";");});
+    lines.push("  /* Chart colours — fixed order, never cycled; validated on #faf6ea. */");
+    ["--series-1","--series-2","--series-3","--series-4","--series-5","--series-6","--series-7","--series-8","--seq-100","--seq-200","--seq-300","--seq-400","--seq-500","--seq-600","--seq-700","--seq2-100","--seq2-200","--seq2-300","--seq2-400","--seq2-500","--seq2-600","--seq2-700","--div-mid","--status-good","--status-warning","--status-serious","--status-critical","--chart-surface","--chart-grid","--chart-axis","--chart-ink","--chart-ink-2"].forEach(function(v){lines.push("  "+v+": "+getComputedStyle(root).getPropertyValue(v).trim()+";");});
     lines.push("  --shadow: 0 10px 24px -10px #2c2a3340, 0 2px 6px #2c2a3314;");
     lines.push("  --radius-panel: 12px 14px 11px 15px; --radius-header: 18px; --radius-button: 8px 10px 8px 9px;");
     lines.push("}");
@@ -867,6 +989,8 @@
     {name:"Data & decoration behaviour",items:[
       "Failures and incomplete coverage stay visible beside headline metrics.",
       "Null/unavailable shows em dash; zero shows zero.",
+      "Charts use --series-* in fixed order; a 9th series folds into Other; scatter/maps use slots 1–3 only.",
+      "Series 3 and 7 (under 3:1) ship with direct labels or a table view; status marks carry icon + label.",
       "(If rotating) visits/refreshes advance imagery; polling does not.",
       "(If rotating) every work appears once per bag; no immediate repeat at cycle boundaries.",
       "(If rotating) back/forward, storage denial, damaged state, image failure handled; caption matches image."]}

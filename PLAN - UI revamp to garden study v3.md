@@ -36,7 +36,7 @@ Housekeeping found on the way:
 |---|---|---|
 | D1 | **Header imagery.** Replace the rotating painting catalogue with the seeded, generated painted field, or keep the rotation re-skinned? | **Replace.** The workbook's default is "generated from the palette, not cut from a painting". It removes the remote Wikimedia dependency, the attribution and rights burden, and the rotation edge cases. Keep `src/ui/artwork*` in git history only. |
 | D2 | **Mobile navigation ≤650px**: icon rail, drawer, or keep the bottom tab bar? | **Keep the bottom tab bar and record it as a deliberate departure.** It is better for one-handed phone checks and is already tested. If you would rather stay strictly on-spec, use the icon rail. |
-| D3 | **Chart palette.** The workbook does not define series colours. | Series 1 = `--color-action` violet, series 2 = `#6d84a8` blue-grey (the Clichy tick blue, darkened to ≥3:1 on chalk), reference/threshold = `--color-muted` dashed. Gate state bands reuse state *backgrounds* (`success-bg` / `warning-bg` / `neutral-bg` / `danger-bg`), never `--d*`. |
+| D3 | **Chart palette** | **Settled by the workbook (updated 2026-11-25):** `--series-1..8` in fixed order, never cycled; sequential `--seq-*` (violet), second sequential `--seq2-*` (red earth), diverging violet ↔ grey ↔ red earth; `--status-good/warning/serious/critical` for good/bad chart marks with icon + label; `--chart-surface/grid/axis/ink/ink-2`. Slots 3 and 7 (under 3:1) need direct labels or a table view. |
 | D4 | **Gate state → semantic mapping** | ON → success, RISK CUT → warning, OFF → neutral, KILL → danger, UNCONFIRMED → neutral with the text "Unconfirmed", Provisional → active (violet). Red earth is never used for KILL. |
 | D5 | **UI_HANDBOOK.md**: restore it or let the workbook stand alone? | Restore it from `HEAD` (it holds Appendix A and the rotation spec the workbook refers to), add a short note that v3 is the Garden study, and commit both files together. |
 
@@ -97,7 +97,7 @@ Consolidate into `src/components/ui/` (or extend `dashboard-ui.tsx`):
 ### Phase 6: Page-by-page pass (2 days)
 In order: **Today → Gate → Puts → Portfolio → Monitor → Backtest → Rules → Login**, then delete or redirect the `[section]` placeholder.
 - One h1 per page through `PageHeading`, with a task description. One primary action per task area.
-- Charts (`gate-charts`, `monitor-charts`, `backtest-charts`): swap hard-coded hexes for the D3 chart tokens read from CSS variables. Chalk plot area, no brushwork under figures, legend as text + swatch.
+- Charts (`gate-charts`, `monitor-charts`, `backtest-charts`, returns heatmap): use the workbook chart tokens through one shared `src/ui/chart-theme.ts`. 2px lines, recessive grid, one axis, direct labels at the line ends plus a legend, keyboard crosshair (Recharts accessibility layer), a "Show as table" disclosure, chalk plot area, no brushwork under figures. Gate bands use chart status colours with text labels; the monthly-returns heatmap uses the diverging ramp with signed values printed in each cell.
 - Today's decision hero: the gate badge carries the state. The positional band stays decorative, so the hero no longer turns colour by state.
 - Login: chalk card on sage + field. It is the first screen, so it gets the full treatment.
 
@@ -121,7 +121,7 @@ About **9–10 working days** for one developer or agent. Phases 1→2→3 are s
 | Generated field looks crude compared with the workbook | Port the workbook's generator code directly rather than re-inventing it. Compare side-by-side at 1440. |
 | Table card-stacking removal hurts phone reading of Today's actions | Keep a 2-column "key facts" summary above the scroll table on ≤650px if the review at 375px shows it's needed. |
 | Moving the snapshot editor into a dialog breaks the e2e tests from `e9f1f4e` / `efa1918` | Do it last in Phase 4, or defer. It is optional for workbook compliance. |
-| Chart colour swap hides a series in dark-on-dark | Assert ≥3:1 for each chart token on chalk in the contrast test. |
+| Ochre and olive series fall under 3:1 on chalk | Per the workbook: any chart using slot 3 or 7 gets direct labels or a table view. The contrast test asserts the other series tokens reach 3:1. |
 | Scope creep into engine or data changes | Out of scope. Any data-honesty gap that needs new fields becomes a separate ticket. |
 
 ## 7. Out of scope
