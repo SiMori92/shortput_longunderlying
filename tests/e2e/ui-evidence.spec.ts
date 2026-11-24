@@ -19,6 +19,7 @@ test("evidence login", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:3100/login");
+  await page.waitForLoadState("networkidle");
   await page.screenshot({ path: `${dir}/login-1440.jpg`, type: "jpeg", quality: 70, fullPage: true });
   await page.setViewportSize({ width: 375, height: 800 });
   await page.screenshot({ path: `${dir}/login-375.jpg`, type: "jpeg", quality: 70, fullPage: true });

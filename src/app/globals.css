@@ -574,16 +574,17 @@ a.button.primary:hover, button.button.primary:enabled:hover { background: var(--
 .section-heading { flex-wrap: wrap; }
 .section-heading h2 { min-width: 0; }
 .chip { white-space: normal; text-align: center; }
-.page-heading { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr); min-height: 216px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
-.page-heading-content { min-width: 0; padding: 28px 32px; align-self: center; }
-.page-heading-description { color: var(--muted); margin-top: 10px; line-height: 1.6; max-width: 64ch; }
-.page-heading-action { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-.page-heading-compact { min-height: 152px; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr); }
-.page-heading-compact .page-heading-content { padding: 20px 28px; }
-.artwork-header { margin: 0; min-width: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); border-radius: 0 16px 16px 0; overflow: hidden; background: var(--accent-soft); }
-.artwork-image { flex: 1; min-height: 100px; background-size: cover; background-position: center 55%; }
-.artwork-caption { min-height: 40px; padding: 8px 12px; background: var(--surface); color: var(--muted); font-size: 12px; line-height: 1.5; }
-.artwork-caption a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+/* ── Page heading: chalk plaque on a seeded painted field (workbook hero). Text never sits on brushwork. */
+.page-heading{position:relative; display:flex; align-items:center; min-height:232px; padding:28px; border-radius:var(--radius-header); overflow:hidden; background:#9aa58e; box-shadow:0 18px 40px -18px #2c2a3399,0 0 0 1px #2c2a3333}
+.page-heading>.garden-field{position:absolute; inset:0; width:100%; height:100%}
+.page-plaque{position:relative; width:min(640px,62%); min-width:0; background:var(--color-surface); border-radius:16px 20px 14px 22px; padding:26px 28px 24px; box-shadow:0 14px 30px -12px #2c2a3380,0 0 0 1px #2c2a331f}
+.page-plaque::before{content:""; position:absolute; left:24px; right:24px; top:-5px; height:10px; background:var(--contour) repeat-x 0 0/120px 10px}
+.page-heading-description{color:var(--color-muted); margin-top:10px; line-height:1.6; max-width:64ch}
+.page-heading-action{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.page-heading-compact{min-height:0; padding:20px}
+.page-heading-compact .page-plaque{padding:20px 24px 18px}
+@media (max-width: 900px){ .page-heading{padding:56px 12px 12px; min-height:0} .page-plaque{width:100%} .page-heading-compact{padding:40px 12px 12px} }
+@media (max-width: 650px){ .page-heading{padding:36px 8px 8px; border-radius:14px} .page-plaque{padding:20px 18px 18px} .page-heading-description{font-size:13px} .page-heading-compact{padding:0; background:var(--color-surface); box-shadow:var(--shadow)} .page-heading-compact>.garden-field{display:none} .page-heading-compact .page-plaque{box-shadow:none} }
 .decision-hero { border-left: 4px solid var(--off); }
 .hero-on { border-left-color: var(--on); }
 .hero-risk-cut, .hero-unconfirmed { border-left-color: var(--amber); }
@@ -592,11 +593,9 @@ a.button.primary:hover, button.button.primary:enabled:hover { background: var(--
 .chart-legend { color: var(--brand); }
 .chart-legend .legend-fast { color: var(--amber); }
 .chart-legend .legend-slow { color: var(--chart-secondary); }
-@media (max-width: 1150px) { h1 { font-size: 42px; } .page-heading-content { padding: 24px; } }
-@media (max-width: 900px) { .page-heading { grid-template-columns: minmax(0, 1fr); } .artwork-header { border-left: 0; border-top: 1px solid var(--border); border-radius: 0 0 16px 16px; } .artwork-image { min-height: 100px; background-position: center 60%; } .page-heading-compact .artwork-header { display: none; } }
-@media (max-width: 767px) { .page-heading-content, .page-heading-compact .page-heading-content { padding: 22px 20px; } }
+@media (max-width: 1150px) { h1 { font-size: 42px; } }
 @media (max-width: 900px) { h1 { font-size: 38px; } }
-@media (max-width: 650px) { h1 { font-size: 32px; } .page-heading-description { font-size: 13px; } .artwork-image { min-height: 82px; } .page-heading-compact { min-height: 0; } }
+@media (max-width: 650px) { h1 { font-size: 32px; } }
 @media (max-width: 390px) { .kpi-grid, .backtest-kpis, .monitor-checklist { grid-template-columns: minmax(0, 1fr); } }
 
 #run-validation { scroll-margin-top: 110px; }
