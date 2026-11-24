@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI Design Workbook</title>
+<style>
+  /* Garden study edition (v3).
+     Main tone: The garden of Saint-Paul's Hospital (1889) and Reminiscence of Brabant (1890),
+     with a touch of Boulevard de Clichy (1887).
+     - Brabant gives the ground: grey-green sage, worked in swirls, edged by ochre contours.
+     - The garden gives the voice: violet-indigo mountains (action), red earth, lavender sky dashes.
+     - Clichy gives the hand: short broken ticks of lilac, yellow and blue beside the type.
+     Brushwork lives in decorative zones (hero, rules, card heads, footer). Work surfaces stay opaque chalk.
+     Decorative accents have no status meaning. Red earth is not failure. */
+  :root{
+    --color-bg:#d6d9c6; --color-surface:#faf6ea; --color-text:#2c2a33; --color-muted:#4b5244;
+    --color-line:#7b806c; --color-action:#443c6b; --color-action-hover:#332c56; --color-focus:#443c6b;
+    --color-success:#2f5d3a; --color-success-bg:#e5eedb; --color-warning:#6b4b0c; --color-warning-bg:#f6ecc9;
+    --color-danger:#8a2a1d; --color-danger-bg:#f8e4dc; --color-active:#443c6b; --color-active-bg:#ebe7f3;
+    --color-neutral:#4b5244; --color-neutral-bg:#eae6d8;
+    --d1:#d1a93a; --d2:#9690c4; --d3:#7f9a7a; --d4:#a2432a;
+    --shadow:0 1px 0 #ffffff80 inset,0 10px 24px -10px #2c2a3340,0 2px 6px #2c2a3314;
+    --radius-panel:12px 14px 11px 15px; --radius-header:18px; --radius-button:8px 10px 8px 9px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    /* Brabant ochre contour — a hand-drawn wave, used for rules. */
+    --contour:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='10' viewBox='0 0 120 10'%3E%3Cpath d='M1 6c10-6 18 3 28-1s16-5 26 0 18 4 28-1 18-4 36 1' fill='none' stroke='%23d1a93a' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M4 7.5c9-3 15 1 22-.5' fill='none' stroke='%23e8cf73' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+    /* Clichy ticks — broken colour, short strokes. */
+    --ticks:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='14' viewBox='0 0 64 14'%3E%3Cg stroke-linecap='round' stroke-width='2.6' fill='none'%3E%3Cpath d='M3 9l7-3' stroke='%239690c4'/%3E%3Cpath d='M13 5l6 2' stroke='%23d1a93a'/%3E%3Cpath d='M22 10l7-4' stroke='%237f9a7a'/%3E%3Cpath d='M32 4l6 3' stroke='%236d84a8'/%3E%3Cpath d='M41 9l7-2' stroke='%23cdbfdc'/%3E%3Cpath d='M51 5l6 3' stroke='%23a2432a'/%3E%3Cpath d='M58 10l5-3' stroke='%23d1a93a'/%3E%3C/g%3E%3C/svg%3E");
+    /* Linen weave under the whole page. */
+    --weave:repeating-linear-gradient(0deg,#ffffff14 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,#2c2a330a 0 1px,transparent 1px 3px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--weave),var(--color-bg);color:var(--color-text);font-family:var(--sans);font-size:14px;line-height:1.55;}
+  h1,h2,h3{margin:0;}
+  a{color:var(--color-action);text-decoration-color:var(--d1);text-decoration-thickness:2px;text-underline-offset:3px;}
+  code,.mono{font-family:var(--mono);font-size:12px;}
+  ::selection{background:#d1a93a66;color:var(--color-text);}
+  :focus-visible{outline:3px solid var(--color-focus);outline-offset:3px;border-radius:6px;box-shadow:0 0 0 7px #d1a93a80;}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--color-action);color:#fff;padding:8px 14px;z-index:200;border-radius:0 0 8px 0;}
+  .skip:focus{left:0;}
+
+  /* Top bar — chalk wall, ochre contour underneath. */
+  .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:12px 24px 15px;background:var(--color-surface);box-shadow:0 10px 18px -12px #2c2a3366;}
+  .topbar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:10px;background:var(--contour) repeat-x 0 0/120px 10px;pointer-events:none;}
+  .topbar .brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.3px;}
+  .topbar .brand em{font-weight:400;color:var(--color-muted);font-size:15px;}
+  .sunmark{width:22px;height:22px;flex:none;}
+  .topbar nav{display:flex;gap:2px;flex-wrap:wrap;flex:1;}
+  .topbar nav a{font-size:12px;text-decoration:none;color:var(--color-muted);padding:5px 9px;border-radius:7px 9px 7px 8px;}
+  .topbar nav a:hover{background:var(--color-active-bg);color:var(--color-active);}
+  .topbar .tools{display:flex;gap:8px;}
+
+  main{max-width:1180px;margin:0 auto;padding:30px 24px 80px;}
+  section{margin-bottom:56px;scroll-margin-top:84px;}
+  .eyebrow{font-family:var(--serif);font-style:italic;font-size:14px;letter-spacing:.2px;color:var(--color-muted);margin-bottom:4px;}
+  .eyebrow::before{content:"";display:inline-block;width:30px;height:7px;margin-right:8px;vertical-align:middle;background:var(--ticks) no-repeat 0 50%/64px 14px;}
+  h1.page{font-family:var(--serif);font-size:46px;font-weight:400;letter-spacing:-1.2px;line-height:1.12;}
+  h1.page em{color:var(--color-action);}
+  h2.sec{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.6px;margin-bottom:6px;}
+  h2.sec::after{content:"";display:block;width:150px;height:10px;margin-top:6px;background:var(--contour) repeat-x 0 0/120px 10px;}
+  h3.sub{font-family:var(--serif);font-size:19px;font-weight:600;margin:28px 0 10px;letter-spacing:-.2px;}
+  .lead{color:var(--color-muted);max-width:70ch;margin:8px 0 0;}
+  .panel{background:var(--color-surface);border:1px solid #7b806c80;border-radius:var(--radius-panel);box-shadow:var(--shadow);padding:22px;}
+  .grid{display:grid;gap:18px;}
+  .note{font-size:12px;color:var(--color-muted);}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px 18px 20px 16px;background:var(--color-active-bg);color:var(--color-active);}
+
+  /* Principle cards: Clichy ticks as a head, not under the text. */
+  .principle{position:relative;padding-top:30px;}
+  .principle::before{content:"";position:absolute;left:20px;top:14px;width:64px;height:14px;background:var(--ticks) no-repeat;}
+  .principle:nth-child(3n+2)::before{transform:scaleX(-1);}
+
+  /* Hero — a painted field (generated brushwork, Brabant sky over garden earth),
+     with a chalk plaque for the type. Text never sits on the brushwork. */
+  .hero{position:relative;border-radius:var(--radius-header);overflow:hidden;margin:14px 0 18px;min-height:460px;
+    background:#9aa58e;box-shadow:0 18px 40px -18px #2c2a3399,0 0 0 1px #2c2a3333;display:grid;
+    grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:center;padding:36px;}
+  .hero canvas.paint{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .hero .plaque{position:relative;background:#faf6eaf2;border-radius:16px 20px 14px 22px;padding:30px 30px 26px;
+    box-shadow:0 14px 30px -12px #2c2a3380,0 0 0 1px #2c2a331f;}
+  .hero .plaque::before{content:"";position:absolute;left:24px;right:24px;top:-5px;height:10px;background:var(--contour) repeat-x 0 0/120px 10px;}
+  .triptych{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:12px;height:100%;min-height:340px;}
+  .triptych figure{margin:0;position:relative;background:#faf6ea;padding:7px 7px 26px;border-radius:6px 8px 5px 9px;
+    box-shadow:0 12px 26px -10px #2c2a33aa,0 0 0 1px #2c2a3333;display:flex;flex-direction:column;}
+  .triptych figure:first-child{grid-row:1 / span 2;}
+  .triptych img{width:100%;flex:1;min-height:0;object-fit:cover;display:block;border-radius:3px;}
+  .triptych figcaption{position:absolute;left:9px;right:9px;bottom:5px;font-family:var(--serif);font-style:italic;font-size:12px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  .set-strip{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 6px;}
+  .set-strip span.k{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--color-muted);margin-right:2px;}
+  .set-strip img{width:56px;height:42px;object-fit:cover;border-radius:4px;border:2px solid var(--color-surface);box-shadow:0 2px 6px #2c2a3333;opacity:.85;}
+
+  .pair{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 4px;}
+  .pair div{background:var(--color-surface);border-radius:var(--radius-panel);overflow:hidden;box-shadow:var(--shadow);border:1px solid #7b806c66;}
+  .pair .bar{height:54px;position:relative;}
+  .pair .bar::after{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(115deg,#ffffff38 0 3px,transparent 3px 9px),
+    repeating-linear-gradient(25deg,#2c2a331a 0 2px,transparent 2px 11px);}
+  .pair p{margin:0;padding:9px 11px;font-size:12px;font-weight:600;line-height:1.35;color:var(--color-text);}
+
+  /* Buttons — slightly uneven corners, a painted hand without losing the edge. */
+  .button{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-size:13px;font-weight:600;
+    border-radius:var(--radius-button);min-height:42px;padding:10px 16px;border:1px solid transparent;cursor:pointer;text-decoration:none;line-height:1;
+    transition:background .15s,box-shadow .15s;}
+  .button.primary{background:var(--color-action);color:#fff;box-shadow:inset 0 -3px 0 #00000026,0 2px 0 #d1a93a;}
+  .button.primary:hover{background:var(--color-action-hover);}
+  .button.secondary{background:var(--color-surface);color:var(--color-text);border-color:var(--color-line);box-shadow:inset 0 -2px 0 #2c2a3312;}
+  .button.secondary:hover{background:var(--color-active-bg);}
+  .button.small{font-size:12px;min-height:31px;padding:6px 11px;}
+  .button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+  .icon-button{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;
+    background:transparent;border:none;border-radius:8px;cursor:pointer;color:var(--color-text);}
+  .icon-button:hover{background:var(--color-active-bg);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+  /* Swatches / theme editor — each chip is a daub. */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .swatch{border:1px solid #7b806c80;border-radius:var(--radius-panel);overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow);}
+  .swatch .chip{height:60px;position:relative;}
+  .swatch .chip::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+    radial-gradient(ellipse 40% 30% at 30% 40%,#ffffff2e,transparent 70%),
+    repeating-linear-gradient(120deg,#ffffff1f 0 2px,transparent 2px 8px);}
+  .swatch .chip input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;z-index:1;}
+  .swatch .meta{padding:8px 10px;}
+  .swatch .var{font-family:var(--mono);font-size:11px;color:var(--color-text);display:block;}
+  .swatch .role{font-size:11px;color:var(--color-muted);display:block;margin-top:2px;}
+  .swatch .hex{font-family:var(--mono);font-size:11px;color:var(--color-muted);}
+  .contrast-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .contrast-table th,.contrast-table td{text-align:left;padding:8px 10px;border-bottom:1px solid #7b806c66;}
+  .pass{color:var(--color-success);font-weight:600;}
+  .fail{color:var(--color-danger);font-weight:600;}
+
+  /* Badges */
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px 16px 20px 18px;}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .badge.success{color:var(--color-success);background:var(--color-success-bg);}
+  .badge.warning{color:var(--color-warning);background:var(--color-warning-bg);}
+  .badge.danger{color:var(--color-danger);background:var(--color-danger-bg);}
+  .badge.active{color:var(--color-active);background:var(--color-active-bg);}
+  .badge.neutral{color:var(--color-neutral);background:var(--color-neutral-bg);}
+
+  /* Forms */
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-width:340px;}
+  .field label{font-size:12px;font-weight:600;}
+  .field input,.field select{font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--color-line);
+    border-radius:8px 10px 8px 9px;background:#fffdf7;color:var(--color-text);min-height:38px;}
+  .field .help{font-size:12px;color:var(--color-muted);}
+  .check{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .check input{accent-color:var(--color-action);width:16px;height:16px;}
+
+  /* Alerts */
+  .alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px 12px 9px 13px;font-size:13px;margin-bottom:10px;border:1px solid;border-left-width:4px;}
+  .alert.error{color:var(--color-danger);background:var(--color-danger-bg);border-color:var(--color-danger);}
+  .alert.warning{color:var(--color-warning);background:var(--color-warning-bg);border-color:var(--color-warning);}
+  .alert.info{color:var(--color-active);background:var(--color-active-bg);border-color:var(--color-active);}
+
+  /* Metrics — a painted band at the head of each card, by position. */
+  .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .metric{background:var(--color-surface);border:1px solid #7b806c80;border-radius:var(--radius-panel);
+    box-shadow:var(--shadow);padding:30px 18px 18px;position:relative;overflow:hidden;}
+  .metric::before{content:"";position:absolute;top:0;left:0;right:0;height:14px;
+    -webkit-mask:var(--contour) repeat-x 0 2px/120px 10px;mask:var(--contour) repeat-x 0 2px/120px 10px;}
+  .metric::after{content:"";position:absolute;top:0;left:0;right:0;height:8px;opacity:.55;}
+  .metric:nth-child(1)::before,.metric:nth-child(1)::after{background:var(--d1);}
+  .metric:nth-child(2)::before,.metric:nth-child(2)::after{background:var(--d2);}
+  .metric:nth-child(3)::before,.metric:nth-child(3)::after{background:var(--d3);}
+  .metric:nth-child(4)::before,.metric:nth-child(4)::after{background:var(--d4);}
+  .metric .m-label{font-size:12px;color:var(--color-muted);display:flex;align-items:center;gap:6px;}
+  .metric .m-value{font-family:var(--serif);font-size:38px;font-variant-numeric:tabular-nums lining-nums;margin-top:4px;line-height:1.1;}
+  .metric .m-sub{font-size:12px;color:var(--color-muted);margin-top:4px;}
+
+  /* Table */
+  .table-wrap{overflow-x:auto;border:1px solid #7b806c80;border-radius:10px 12px 10px 13px;background:var(--color-surface);}
+  table.data{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
+  table.data th,table.data td{text-align:left;padding:10px 12px;border-bottom:1px solid #7b806c4d;vertical-align:top;}
+  table.data tr:last-child td{border-bottom:none;}
+  table.data th{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--color-muted);font-weight:400;background:#eef0e4;}
+  table.data td.num{font-variant-numeric:tabular-nums;}
+  details.row-detail{margin-top:4px;}
+  details.row-detail summary{cursor:pointer;font-size:12px;color:var(--color-action);}
+  details.row-detail .detail-body{font-size:12px;color:var(--color-muted);padding:6px 0 2px;}
+  .pic-cell{display:flex;gap:10px;align-items:flex-start;}
+  .pic-cell img{width:64px;height:50px;object-fit:cover;border-radius:4px;flex:none;box-shadow:0 0 0 1px #2c2a3333;}
+
+  /* States */
+  .state-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
+  .state{border:1px solid #7b806c80;border-radius:var(--radius-panel);padding:16px;background:var(--color-surface);min-height:120px;box-shadow:var(--shadow);}
+  .state h4{margin:0 0 8px;font-family:var(--serif);font-style:italic;font-weight:400;font-size:15px;color:var(--color-muted);}
+  .skeleton{height:12px;border-radius:6px;background:#c9ccb8;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
+  .skeleton.w60{width:60%;}.skeleton.w80{width:80%;}.skeleton.w40{width:40%;}
+  @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+  .big-zero{font-family:var(--serif);font-size:34px;font-variant-numeric:tabular-nums;}
+  .emdash{font-family:var(--serif);font-size:34px;color:var(--color-muted);}
+
+  /* Dialog */
+  dialog.demo{border:none;border-radius:14px 16px 13px 17px;padding:0;width:min(560px,94vw);
+    max-height:92vh;background:var(--color-surface);color:var(--color-text);box-shadow:0 24px 60px #2c2a3366;}
+  dialog.demo::backdrop{background:#2c2a3366;backdrop-filter:blur(2px);}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 18px;position:relative;}
+  .modal-head::after{content:"";position:absolute;left:22px;right:22px;bottom:-4px;height:10px;background:var(--contour) repeat-x 0 0/120px 10px;}
+  .modal-head h3{font-family:var(--serif);font-size:22px;font-weight:400;}
+  .modal-head p{margin:4px 0 0;font-size:13px;color:var(--color-muted);}
+  .modal-body{padding:22px;overflow-y:auto;font-size:13px;}
+  .modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid #7b806c4d;background:#f3efe1;}
+
+  /* Spacing */
+  .space-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .space-bar{height:14px;background:var(--color-action);border-radius:3px 5px 3px 6px;}
+  .space-row .mono{width:48px;color:var(--color-muted);}
+
+  /* Layout demo */
+  .shell-demo{display:grid;grid-template-columns:64px 1fr;border:1px solid #7b806c80;border-radius:12px;overflow:hidden;height:240px;box-shadow:var(--shadow);}
+  .shell-demo .side{background:var(--color-surface);border-right:1px solid #7b806c4d;padding:12px 8px;display:flex;flex-direction:column;gap:10px;align-items:center;}
+  .shell-demo .side .dot{width:32px;height:32px;border-radius:8px 10px 8px 9px;background:var(--color-active-bg);}
+  .shell-demo .side .dot.on{background:var(--color-action);}
+  .shell-demo .body{display:flex;flex-direction:column;}
+  .shell-demo .top{height:40px;background:var(--color-surface);position:relative;}
+  .shell-demo .top::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:8px;background:var(--contour) repeat-x 0 0/96px 8px;}
+  .shell-demo .content{flex:1;padding:18px 16px;background:var(--weave),var(--color-bg);}
+  .shell-demo .content .ph{height:14px;width:40%;background:#2c2a3333;border-radius:5px;margin-bottom:10px;}
+  .shell-demo .content .pc{height:70px;background:var(--color-surface);border:1px solid #7b806c66;border-radius:10px;}
+
+  /* Checklist */
+  .check-group{margin-bottom:18px;}
+  .check-group h3{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:8px;}
+  .check-item{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font-size:13px;}
+  .check-item input{margin-top:3px;width:16px;height:16px;accent-color:var(--color-action);}
+  .progress{height:10px;background:#dcdcc9;border-radius:6px;overflow:hidden;margin:6px 0 2px;}
+  .progress > div{height:100%;width:0;transition:width .2s;background:
+    repeating-linear-gradient(115deg,#ffffff30 0 3px,transparent 3px 8px),var(--color-action);}
+  .progress-label{font-size:12px;color:var(--color-muted);}
+
+  /* Worksheet inputs */
+  .ws{display:grid;gap:12px;max-width:560px;}
+  .ws label{font-size:12px;font-weight:600;display:block;margin-bottom:4px;}
+  .ws input,.ws textarea{width:100%;font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--color-line);border-radius:8px 10px 8px 9px;background:#fffdf7;color:var(--color-text);}
+
+  .type-spec > div{padding:11px 0;border-bottom:1px solid #7b806c4d;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;}
+  .type-spec > div:last-child{border-bottom:none;}
+  .type-spec .role{font-size:11px;color:var(--color-muted);min-width:150px;font-family:var(--mono);}
+  .t-h1{font-family:var(--serif);font-size:46px;font-weight:400;letter-spacing:-1.2px;line-height:1.12;}
+  .t-sec{font-family:var(--serif);font-size:19px;font-weight:600;}
+  .t-body{font-size:14px;}
+  .t-ctrl{font-size:13px;font-weight:600;}
+  .t-sup{font-size:12px;color:var(--color-muted);}
+  .t-metric{font-family:var(--serif);font-size:38px;font-variant-numeric:tabular-nums lining-nums;}
+  .t-eye{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--color-muted);}
+  .t-mono{font-family:var(--mono);font-size:12px;}
+
+  /* Footer — the garden's red earth, painted. Text sits on a chalk band above it. */
+  footer{position:relative;margin-top:20px;}
+  footer .foot-text{position:relative;z-index:1;padding:22px 24px;text-align:center;color:var(--color-muted);font-size:12px;background:var(--color-surface);}
+  footer .foot-text::before{content:"";position:absolute;left:0;right:0;top:-5px;height:10px;background:var(--contour) repeat-x 0 0/120px 10px;}
+  footer canvas.paint{display:block;width:100%;height:90px;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--color-text);color:var(--color-surface);
+    padding:10px 18px;border-radius:9px 11px 9px 12px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;
+    box-shadow:0 -3px 0 var(--d1) inset;}
+  .toast.show{opacity:1;}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:minmax(0,1fr);padding:24px;}
+    .triptych{min-height:260px;}
+    .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    h1.page{font-size:38px;}
+    .split{grid-template-columns:1fr !important;}
+  }
+  @media (max-width:650px){
+    main{padding:22px 16px 64px;}
+    h1.page{font-size:32px;}
+    h2.sec{font-size:26px;}
+    .hero{padding:16px;gap:16px;margin-left:0;margin-right:0;}
+    .hero .plaque{padding:22px 18px 20px;}
+    .triptych{min-height:220px;gap:8px;}
+    .topbar{padding:10px 14px 13px;}
+    .topbar nav{display:none;}
+    .topbar .tools{width:100%;}
+    .pair{grid-template-columns:1fr 1fr;}
+    .pic-cell img{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .skeleton{animation:none;}
+    .progress > div,.toast,.button{transition:none;}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<div class="topbar">
+  <span class="brand">
+    <svg class="sunmark" viewBox="0 0 22 22" aria-hidden="true">
+      <circle cx="11" cy="11" r="10" fill="#7f9a7a"/>
+      <path d="M3 14c3-3 5 1 8-1s5-3 8 0" fill="none" stroke="#d1a93a" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="4" fill="#d1a93a"/>
+      <path d="M8 9.2a3 3 0 0 1 5.8-1.4" fill="none" stroke="#a2432a" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    UI Design Workbook <em>· garden study</em>
+  </span>
+  <nav aria-label="Sections">
+    <a href="#principles">Principles</a>
+    <a href="#colour">Colour</a>
+    <a href="#type">Type</a>
+    <a href="#layout">Layout</a>
+    <a href="#components">Components</a>
+    <a href="#states">States</a>
+    <a href="#data">Data</a>
+    <a href="#a11y">Accessibility</a>
+    <a href="#acceptance">Acceptance</a>
+  </nav>
+  <div class="tools">
+    <button class="button secondary small" id="resetTheme" type="button">Reset theme</button>
+    <button class="button primary small" id="copyCss" type="button">Copy token CSS</button>
+  </div>
+</div>
+
+<main id="main">
+
+  <section id="intro">
+    <div class="hero">
+      <canvas class="paint" id="heroPaint" aria-hidden="true"></canvas>
+      <div class="plaque">
+        <div class="eyebrow">Garden study · Saint-Rémy and Brabant</div>
+        <h1 class="page">UI Design <em>Workbook</em></h1>
+        <p class="lead">Worn in the tone of the asylum garden (1889) and Reminiscence of Brabant (1890), with a touch of Boulevard de Clichy (1887). Brabant gives the sage ground and its ochre contours; the garden gives the violet voice and the red earth; Clichy gives the short broken ticks. The brushwork is around the work, never under it.</p>
+        <div class="row" style="margin-top:16px">
+          <span class="tag">v3.0</span>
+          <span class="tag">Garden · Brabant · Clichy</span>
+          <span class="tag">Live theme editor</span>
+        </div>
+      </div>
+      <div class="triptych">
+        <figure>
+          <img src="impressionst_ref/previews/garden.jpg" alt="Vincent van Gogh, the garden of Saint-Paul’s Hospital, 1889. Twisting violet-grey trunks, a yellow and lavender sky, red earth, and white flowers beside a path." style="object-position:38% 50%" />
+          <figcaption>The asylum garden, 1889</figcaption>
+        </figure>
+        <figure>
+          <img src="impressionst_ref/previews/brabant.jpg" alt="Vincent van Gogh, Reminiscence of Brabant, 1890. A grey-green swirling sky edged with ochre contours, a low red sun, cottages below." style="object-position:50% 40%" />
+          <figcaption>Reminiscence of Brabant, 1890</figcaption>
+        </figure>
+        <figure>
+          <img src="impressionst_ref/previews/clichy.jpg" alt="Vincent van Gogh, Boulevard de Clichy, 1887. A pale street and apartment blocks built from short broken touches of lilac, yellow, and blue." style="object-position:62% 42%" />
+          <figcaption>Boulevard de Clichy, 1887</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="set-strip" aria-label="Also in the reference folder">
+      <span class="k">Also in the folder, as background references:</span>
+      <img src="impressionst_ref/previews/ploughman.jpg" alt="Enclosed field with a ploughman, 1889" />
+      <img src="impressionst_ref/previews/paris.jpg" alt="View of Paris, 1886" />
+      <img src="impressionst_ref/previews/rhone.jpg" alt="Starry Night over the Rhône, 1888" />
+      <img src="impressionst_ref/previews/starry.jpg" alt="The Starry Night, 1889" />
+    </div>
+    <p class="note">The painted field behind the header is generated from the palette, not cut from a painting: Brabant swirls in the sky, ochre contours on the clouds, garden dashes on the red earth, Clichy ticks scattered on top. It is seeded, so it paints the same every visit. The paintings are public domain; the files are local references, not product assets. The ivory/blue Appendix A theme remains in UI_HANDBOOK.md.</p>
+  </section>
+
+  <section id="principles">
+    <div class="eyebrow">§1</div>
+    <h2 class="sec">Design principles</h2>
+    <p class="lead">Calm, capable, human. The garden is atmosphere and the chalk wall is the work: opaque surfaces, one primary action, reserved state colours. Brushwork frames content; it is never a texture under text or figures.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:16px">
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Clarity first</h3><p class="note">Persistent navigation, clear page identity, one prominent action per task area, readable work surfaces.</p></div>
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Honest data</h3><p class="note">Show limitations and failures beside the figures they qualify. Never hide a denominator.</p></div>
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Reserved semantics</h3><p class="note">Red, green, and amber mean labelled states. Ochre contour, lavender, sage, and red earth do not.</p></div>
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Stable while working</h3><p class="note">Loading must not reshuffle imagery or move the main action. The study does not animate.</p></div>
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Accessible by default</h3><p class="note">Keyboard, visible focus, labelled controls, sufficient contrast — requirements, not extras.</p></div>
+      <div class="panel principle"><h3 class="sub" style="margin-top:0">Few consistent decisions</h3><p class="note">Identity is the sage ground, the violet action, the ochre contour, and the serif nameplate — not brushwork on every control.</p></div>
+    </div>
+  </section>
+
+  <section id="colour">
+    <div class="eyebrow">§3 · live worksheet</div>
+    <h2 class="sec">Colour system</h2>
+    <p class="lead">Sampled from the garden, Brabant and Clichy, then adjusted so text and controls pass WCAG AA. Semantic names stay by role. The translation below is the stable set — do not sample chart series, status colours, or button fills from a painting at runtime.</p>
+
+    <div class="pair">
+      <div><div class="bar" style="background:var(--d1)"></div><p>Ochre contour · Brabant clouds, the rule under titles</p></div>
+      <div><div class="bar" style="background:var(--d2)"></div><p>Lavender · garden sky dashes, positional</p></div>
+      <div><div class="bar" style="background:var(--color-action)"></div><p>Garden violet · action and links, the working colour</p></div>
+      <div><div class="bar" style="background:var(--d4)"></div><p>Red earth · garden ground, positional, not failure</p></div>
+    </div>
+    <p class="note">Ochre on chalk is about 2:1 — lovely as a contour, illegal as text or a control label. It stays a line. White on garden violet clears 9.9:1, so the violet does the work. The ground is Brabant sage <span class="mono">#d6d9c6</span>; text on it clears 9.8:1.</p>
+
+    <h3 class="sub">What each picture does</h3>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Picture</th><th>Job in the interface</th><th>Refused</th></tr></thead>
+        <tbody>
+          <tr><td><div class="pic-cell"><img src="impressionst_ref/previews/garden.jpg" alt="" /><span><strong>The asylum garden, 1889</strong><br><span class="note">main tone</span></span></div></td><td>The violet-indigo of the far mountains, deepened, is <span class="mono">--color-action</span> #443c6b. Lavender sky dashes are <span class="mono">--d2</span>. Red earth is <span class="mono">--d4</span> and paints the footer. The trunk outlines give the violet-black ink, <span class="mono">--color-text</span> #2c2a33. The asylum wall is the chalk surface.</td><td>White flowers are notes. Red earth is not failure. Foliage green is not success.</td></tr>
+          <tr><td><div class="pic-cell"><img src="impressionst_ref/previews/brabant.jpg" alt="" /><span><strong>Reminiscence of Brabant, 1890</strong><br><span class="note">main tone</span></span></div></td><td>The ground: grey-green sage <span class="mono">--color-bg</span>, with a linen weave. The ochre cloud contours become the wavy rule under the top bar, titles, the dialog head and the footer. Cloud sage is <span class="mono">--d3</span>. The swirls are the hero sky.</td><td>The swirl does not animate and never sits behind tables, forms, or type. The red sun is not an alert.</td></tr>
+          <tr><td><div class="pic-cell"><img src="impressionst_ref/previews/clichy.jpg" alt="" /><span><strong>Boulevard de Clichy, 1887</strong><br><span class="note">a touch</span></span></div></td><td>Short broken ticks of lilac, ochre, sage, blue and earth: the mark before each eyebrow and on the principle cards, and the scatter across the hero. Slightly uneven corners on cards and buttons are its hand.</td><td>Ticks are not a background, a chart fill, or a button style. Never more than one tick-mark per block.</td></tr>
+          <tr><td>Field, Paris, Rhône, Starry Night</td><td>Kept in the folder as references. Paris remains the argument for a quiet ground; the night pictures are not a theme here.</td><td>They no longer drive tokens.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">Core & state tokens</h3>
+    <div class="swatches" id="coreSwatches"></div>
+    <h3 class="sub">Decorative accents (no status meaning)</h3>
+    <p class="note" style="margin:0 0 10px">Assigned by position: ochre contour, lavender, sage, red earth. Editing these repaints the metric bands and the painted hero and footer. The wavy contour rules are fixed ochre, and the paintings stay the reference.</p>
+    <div class="swatches" id="decoSwatches"></div>
+    <h3 class="sub">Live contrast check (WCAG AA)</h3>
+    <div class="panel" style="padding:8px 14px">
+      <table class="contrast-table" id="contrastTable" aria-live="polite">
+        <thead><tr><th>Pair</th><th>Ratio</th><th>Required</th><th>Result</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:8px">Normal text needs 4.5:1; large text and meaningful UI components need 3:1. The input border is a sage-grey at about 3.8:1 on chalk, so inputs are never outlined in ochre. Recheck opacity and any text placed over a picture. These pairs do not certify the whole app.</p>
+  </section>
+
+  <section id="type">
+    <div class="eyebrow">§4</div>
+    <h2 class="sec">Typography & icons</h2>
+    <p class="lead">A display face for page identity, sans-serif for controls and data, tabular numerals for metrics. Essential supporting copy stays ≥12px; eyebrows only supplement a full title.</p>
+    <div class="panel type-spec" style="margin-top:16px">
+      <div><span class="role">Page title · 46px serif</span><span class="t-h1">Customer reports</span></div>
+      <div><span class="role">Section · 19px serif</span><span class="t-sec">Service performance</span></div>
+      <div><span class="role">Body · 14px</span><span class="t-body">Review performance and identify cases that need attention.</span></div>
+      <div><span class="role">Control · 13px/600</span><span class="t-ctrl">Create report</span></div>
+      <div><span class="role">Supporting · 12px</span><span class="t-sup">Based on 120 of 150 eligible cases</span></div>
+      <div><span class="role">Metric · 38px serif tabular</span><span class="t-metric">1,284</span></div>
+      <div><span class="role">Eyebrow · 14px italic</span><span class="t-eye">Your reporting workspace</span></div>
+      <div><span class="role">Mono · 12px</span><span class="t-mono">--color-action: #2c486c;</span></div>
+    </div>
+    <p class="note" style="margin-top:10px">The serif is the nameplate on the wall; italic serif marks eyebrows, table heads and captions, like a label on a frame. Controls, tables, and explanations stay in the system sans. No remote fonts. Icons: one stroke family (Lucide-style below), nav ~18px, actions ~15–17px. An icon never replaces its text label except in compact navigation or a clearly named icon control.</p>
+    <div class="row" style="margin-top:8px;color:var(--color-text)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+    </div>
+  </section>
+
+  <section id="layout">
+    <div class="eyebrow">§5</div>
+    <h2 class="sec">Layout & responsive behaviour</h2>
+    <p class="lead">A persistent shell (navigation + topbar + main landmark), a shared page heading, and page content. Mount the shell once; provide a skip link to main. The ochre contour marks the bar, not the content.</p>
+    <div class="grid split" style="grid-template-columns:1fr 1fr;margin-top:16px">
+      <div>
+        <h3 class="sub" style="margin-top:0">Shell pattern (scaled)</h3>
+        <div class="shell-demo" aria-hidden="true">
+          <div class="side"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <div class="body"><div class="top"></div><div class="content"><div class="ph"></div><div class="pc"></div></div></div>
+        </div>
+        <p class="note" style="margin-top:8px">≤650px: sidebar becomes an icon rail (with aria-labels) or a drawer — pick one. Wide tables scroll internally; never shrink type to fit a phone.</p>
+      </div>
+      <div>
+        <h3 class="sub" style="margin-top:0">4px spacing rhythm</h3>
+        <div id="spacing"></div>
+      </div>
+    </div>
+    <h3 class="sub">Breakpoints (recommended defaults — record your own)</h3>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Viewport</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>≥1500px</td><td>Roomier top padding; larger dropzones</td></tr>
+          <tr><td>>1150px</td><td>Fixed sidebar ~220px; matching content offset; topbar ~65px</td></tr>
+          <tr><td>≤1150px</td><td>Narrower sidebar ~206px; reduced padding; smaller title</td></tr>
+          <tr><td>≤900px</td><td>Decoration stacks; panels stack; metric grid → 2 columns</td></tr>
+          <tr><td>≤650px</td><td>Icon rail ~60px or drawer; reduced padding; smaller title</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:8px">Check overflow at 375px and 390px, and operability at 200% zoom. Main max-width ~1540px (choose per product).</p>
+  </section>
+
+  <section id="components">
+    <div class="eyebrow">§6</div>
+    <h2 class="sec">Component patterns</h2>
+    <p class="lead">Rendered with the set-study tokens. Adapt values; keep behaviour and accessibility guarantees. Controls stay sharp. Broken colour, from Clichy, is not a button style.</p>
+
+    <h3 class="sub">Buttons & controls</h3>
+    <div class="panel">
+      <div class="row">
+        <button class="button primary" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create report</button>
+        <button class="button secondary" type="button">Export</button>
+        <button class="button secondary small" type="button">Filter</button>
+        <button class="icon-button" type="button" aria-label="Settings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button class="button primary" type="button" disabled>Disabled</button>
+        <button class="button primary" type="button" disabled>Starting…</button>
+        <a class="button secondary" href="#components">Link as button</a>
+      </div>
+      <p class="note" style="margin-top:12px">Primary is garden violet with a thin ochre lip, not ochre itself. Focus is a violet outline with a soft ochre halo — the outline is the indicator, because ochre alone fails on chalk. Links navigate; buttons act. <code>type="button"</code> for non-submit buttons in forms. In-progress uses explicit text and blocks duplicate submits.</p>
+    </div>
+
+    <h3 class="sub">Status badges</h3>
+    <div class="panel">
+      <div class="row">
+        <span class="badge success">Succeeded</span>
+        <span class="badge active">Active</span>
+        <span class="badge warning">Pending</span>
+        <span class="badge danger">Failed</span>
+        <span class="badge neutral">Queued</span>
+        <span class="badge neutral">Unknown → neutral</span>
+      </div>
+      <p class="note" style="margin-top:12px">Colour always pairs with text. Success green is darker than the garden foliage and Brabant sage. Failure crimson is darker and cooler than the red earth, and it always says Failed. Unknown values get neutral styling; design new statuses explicitly.</p>
+    </div>
+
+    <h3 class="sub">Form fields</h3>
+    <div class="panel">
+      <div class="field">
+        <label for="demoName">Report name</label>
+        <input id="demoName" type="text" placeholder="Q3 service review" />
+        <span class="help">Use a task-oriented name.</span>
+      </div>
+      <div class="field">
+        <label for="demoRange">Date range</label>
+        <select id="demoRange"><option>Last 30 days</option><option>Last quarter</option><option>Custom…</option></select>
+      </div>
+      <label class="check"><input type="checkbox" /> Include excluded cases in coverage</label>
+    </div>
+
+    <h3 class="sub">Alerts & errors</h3>
+    <div class="panel">
+      <div class="alert error" role="alert"><strong>Couldn’t load runs.</strong>&nbsp;Check your connection and retry.</div>
+      <div class="alert warning"><strong>Partial coverage.</strong>&nbsp;30 of 150 cases were not assessable.</div>
+      <div class="alert info"><strong>Tip:</strong>&nbsp;Disclose diagnostics with the row’s details toggle.</div>
+    </div>
+
+    <h3 class="sub">Metric cards (positional accents, not status)</h3>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">Total runs</div><div class="m-value">1,284</div><div class="m-sub">all time</div></div>
+      <div class="metric"><div class="m-label">Pass rate</div><div class="m-value">95%</div><div class="m-sub">120 of 150 eligible</div></div>
+      <div class="metric"><div class="m-label">Avg latency</div><div class="m-value">1.2s</div><div class="m-sub">successful requests</div></div>
+      <div class="metric"><div class="m-label">Queued</div><div class="m-value">18</div><div class="m-sub"><span class="badge neutral">Waiting</span></div></div>
+    </div>
+    <p class="note" style="margin-top:8px">The painted bands are ochre, lavender, sage, and red earth — by card position, in that order. An ochre band does not mean the metric is fine; the red-earth band sits on a queued count, so it is not failure. Failure stays in the labelled badge and the table.</p>
+
+    <h3 class="sub">Table with disclosure</h3>
+    <div class="panel" style="padding:14px">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Runs table, scrollable">
+        <table class="data">
+          <thead><tr><th>Run</th><th>Status</th><th>Progress</th><th>Pass rate</th><th>Latency</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">run-0421</td><td><span class="badge success">Succeeded</span></td><td class="num">150/150</td><td class="num">95%</td><td class="num">1.2s</td>
+              <td><details class="row-detail"><summary>Diagnostics</summary><div class="detail-body">Coverage 80% · 30 unassessable · evaluator v2</div></details></td></tr>
+            <tr><td class="mono">run-0420</td><td><span class="badge danger">Failed</span></td><td class="num">88/150</td><td class="num">—</td><td class="num">—</td>
+              <td><details class="row-detail"><summary>Diagnostics</summary><div class="detail-body">Interrupted at record 88 · retry available</div></details></td></tr>
+            <tr><td class="mono">run-0419</td><td><span class="badge warning">Pending</span></td><td class="num">0/150</td><td class="num">—</td><td class="num">—</td>
+              <td><details class="row-detail"><summary>Diagnostics</summary><div class="detail-body">Queued · waiting for worker</div></details></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">Semantic markup, column headings, focusable scroll region. Failures stay visible; diagnostics are disclosed, not hidden. The row is not a giant click target. Table surfaces stay chalk — no brushwork under the figures.</p>
+    </div>
+
+    <h3 class="sub">Dialog</h3>
+    <div class="panel">
+      <button class="button primary" type="button" id="openDialog">Open review dialog</button>
+      <p class="note" style="margin-top:10px">Native <code>dialog</code> + <code>showModal()</code>: labelled title, focus on close, Escape/backdrop close, focus restored, body scrolls. The dialog is another wall: opaque chalk under an ochre contour, not the painting.</p>
+    </div>
+  </section>
+
+  <section id="states">
+    <div class="eyebrow">§6.9</div>
+    <h2 class="sec">The five distinct states</h2>
+    <p class="lead">Loading, empty, failed, unavailable, and zero are different. Never turn a failed request into a reassuring empty state.</p>
+    <div class="state-grid" style="margin-top:16px">
+      <div class="state"><h4>Loading</h4><div class="skeleton w80"></div><div class="skeleton w60"></div><div class="skeleton w40"></div></div>
+      <div class="state"><h4>Empty</h4><p class="note" style="margin:0 0 10px">No runs yet.</p><button class="button primary small" type="button">Create a run</button></div>
+      <div class="state"><h4>Failed</h4><p class="note" style="margin:0 0 10px;color:var(--color-danger)">Request failed.</p><button class="button secondary small" type="button">Retry</button></div>
+      <div class="state"><h4>Unavailable</h4><div class="emdash">—</div><p class="note" style="margin:6px 0 0">Not measured</p></div>
+      <div class="state"><h4>Zero</h4><div class="big-zero">0</div><p class="note" style="margin:6px 0 0">A real value, not missing</p></div>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="eyebrow">§7</div>
+    <h2 class="sec">Data honesty & metric integrity</h2>
+    <p class="lead">Define each product’s metrics separately, but reuse the honesty patterns: show the denominator beside the percentage, keep null distinct from zero.</p>
+    <div class="grid split" style="grid-template-columns:1fr 1fr;margin-top:16px">
+      <div class="panel">
+        <div class="m-label" style="font-size:12px;color:var(--color-muted)">Resolution rate</div>
+        <div style="font-size:34px;font-variant-numeric:tabular-nums;margin:6px 0">95%</div>
+        <p class="note" style="margin:0">Based on 120 of 150 eligible cases · 30 excluded shown beside the figure, never hidden.</p>
+      </div>
+      <div class="panel">
+        <h3 class="sub" style="margin-top:0">Metric definition worksheet</h3>
+        <div class="ws">
+          <div><label for="wsMetric">Metric name</label><input id="wsMetric" type="text" placeholder="Resolution rate" /></div>
+          <div><label for="wsNum">Numerator / Denominator</label><input id="wsNum" type="text" placeholder="resolved / eligible cases" /></div>
+          <div><label for="wsExcl">Exclusions shown beside it?</label><input id="wsExcl" type="text" placeholder="Yes — 30 unassessable" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="a11y">
+    <div class="eyebrow">§10</div>
+    <h2 class="sec">Accessibility baseline</h2>
+    <p class="lead">This workbook itself demonstrates the baseline: skip link, visible focus, labelled controls, text+colour states, reduced-motion support, and a native dialog with focus management. The garden study adds no motion and puts no text on brushwork.</p>
+    <div class="panel" style="margin-top:16px">
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.9">
+        <li>Keyboard reaches navigation, actions, filters, and table disclosures.</li>
+        <li>Skip link targets <code>main</code>; focus is a 3px violet outline, offset, with an ochre halo that is not the indicator.</li>
+        <li>Dialog title, focus placement, Escape, and focus restoration work.</li>
+        <li>Statuses and errors use text as well as colour; fields have programmatic labels.</li>
+        <li>Essential text meets contrast (see the live check in §3). Ochre is never used as text.</li>
+        <li><code>prefers-reduced-motion</code> respected; the study does not animate in any case.</li>
+        <li>Hidden visible text (icon rail) keeps accessible names via <code>aria-label</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="acceptance">
+    <div class="eyebrow">§12 · interactive</div>
+    <h2 class="sec">Acceptance checklist</h2>
+    <p class="lead">Tick items as you verify them. Progress is saved in this browser. Record deliberate departures in the product worksheet.</p>
+    <div class="panel" style="margin-top:16px">
+      <div class="progress-label" id="overallLabel">0 of 0 complete</div>
+      <div class="progress"><div id="overallBar"></div></div>
+      <div id="checklists" style="margin-top:16px"></div>
+      <button class="button secondary small" type="button" id="clearChecks" style="margin-top:8px">Clear all</button>
+    </div>
+  </section>
+
+  <section id="product">
+    <div class="eyebrow">§2 · worksheet</div>
+    <h2 class="sec">Product definition</h2>
+    <p class="lead">Anchor every decision. Saved in this browser. If a product keeps the ivory/blue Appendix A theme instead of this garden study, record that as a departure — both are valid.</p>
+    <div class="panel ws" style="margin-top:16px">
+      <div><label for="pName">Product name</label><input id="pName" type="text" placeholder="e.g. Customer support analytics" /></div>
+      <div><label for="pTask">Primary task</label><input id="pTask" type="text" placeholder="e.g. Review service performance and flag overdue cases" /></div>
+      <div><label for="pMetrics">Key decision metrics</label><input id="pMetrics" type="text" placeholder="e.g. resolution rate, overdue count, latency" /></div>
+      <div><label for="pDepart">Deliberate departures (and why)</label><textarea id="pDepart" rows="3" placeholder="e.g. kept Appendix A ivory instead of the garden study; drawer instead of icon rail because…"></textarea></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-text">UI Design Workbook v3.0 · Garden study · the asylum garden, Brabant, and a touch of Clichy · companion to UI_HANDBOOK.md · Appendix A ivory/blue is unchanged in the handbook. Reset theme restores this study.</div>
+  <canvas class="paint" id="footPaint" aria-hidden="true"></canvas>
+</footer>
+
+<dialog class="demo" id="demoDialog" aria-labelledby="dlgTitle" aria-describedby="dlgDesc">
+  <div class="modal-head">
+    <div><h3 id="dlgTitle">Review run-0421</h3><p id="dlgDesc">Confirm the evaluation details before regrading.</p></div>
+    <button class="icon-button" type="button" id="closeDialog" aria-label="Close dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="modal-body">
+    <p>This dialog uses the native dialog element with <code>showModal()</code>. Focus moves to the close button, Escape and backdrop clicks close it, and focus returns to the trigger. The body scrolls while the dialog stays contained.</p>
+    <div class="alert info" style="margin-top:12px">The caller owns the busy-state closure policy: decide whether the user may close mid-operation.</div>
+    <p style="margin-top:12px">Desktop width <code>min(1100px, 94vw)</code>, max-height 92vh; mobile 97vw / 96vh. This demo uses a narrower width for illustration.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="button secondary" type="button" id="cancelDialog">Cancel</button>
+    <button class="button primary" type="button" id="confirmDialog">Regrade</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var TOKENS=[
+    {v:"--color-bg",label:"Brabant sage ground",def:"#d6d9c6"},
+    {v:"--color-surface",label:"Chalk wall / cards / nav",def:"#faf6ea"},
+    {v:"--color-text",label:"Trunk ink / metrics",def:"#2c2a33"},
+    {v:"--color-muted",label:"Supporting copy",def:"#4b5244"},
+    {v:"--color-line",label:"Input border",def:"#7b806c"},
+    {v:"--color-action",label:"Garden violet / links",def:"#443c6b"},
+    {v:"--color-action-hover",label:"Primary hover",def:"#332c56"},
+    {v:"--color-focus",label:"Focus outline",def:"#443c6b"},
+    {v:"--color-success",label:"Success text",def:"#2f5d3a"},
+    {v:"--color-success-bg",label:"Success badge bg",def:"#e5eedb"},
+    {v:"--color-warning",label:"Pending / caution text",def:"#6b4b0c"},
+    {v:"--color-warning-bg",label:"Warning badge bg",def:"#f6ecc9"},
+    {v:"--color-danger",label:"Failure text",def:"#8a2a1d"},
+    {v:"--color-danger-bg",label:"Failure badge bg",def:"#f8e4dc"},
+    {v:"--color-active",label:"Active / selected text",def:"#443c6b"},
+    {v:"--color-active-bg",label:"Active surface",def:"#ebe7f3"},
+    {v:"--color-neutral",label:"Neutral badge text",def:"#4b5244"},
+    {v:"--color-neutral-bg",label:"Neutral badge bg",def:"#eae6d8"}
+  ];
+  var DECO=[
+    {v:"--d1",label:"Ochre contour · positional",def:"#d1a93a"},
+    {v:"--d2",label:"Garden lavender · positional",def:"#9690c4"},
+    {v:"--d3",label:"Brabant sage · positional",def:"#7f9a7a"},
+    {v:"--d4",label:"Red earth · positional",def:"#a2432a"}
+  ];
+  var current={};
+  TOKENS.concat(DECO).forEach(function(t){current[t.v]=t.def;});
+
+  function getVal(v){return current[v]||getComputedStyle(root).getPropertyValue(v).trim();}
+  function setVal(v,hex){current[v]=hex;root.style.setProperty(v,hex);}
+
+  function buildSwatches(list,container){
+    container.innerHTML="";
+    list.forEach(function(t){
+      var el=document.createElement("div");el.className="swatch";
+      var chip=document.createElement("div");chip.className="chip";chip.style.background=getVal(t.v);
+      var input=document.createElement("input");input.type="color";input.value=getVal(t.v);
+      input.setAttribute("aria-label","Edit "+t.v+" ("+t.label+")");
+      var meta=document.createElement("div");meta.className="meta";
+      var varName=document.createElement("span");varName.className="var";varName.textContent=t.v;
+      var role=document.createElement("span");role.className="role";role.textContent=t.label;
+      var hex=document.createElement("span");hex.className="hex";hex.textContent=getVal(t.v);
+      input.addEventListener("input",function(){
+        setVal(t.v,input.value);chip.style.background=input.value;hex.textContent=input.value;
+        updateContrast();
+        if(t.v.indexOf("--d")===0){repaintSoon();}
+      });
+      chip.appendChild(input);meta.appendChild(varName);meta.appendChild(role);meta.appendChild(hex);
+      el.appendChild(chip);el.appendChild(meta);container.appendChild(el);
+    });
+  }
+
+  function lum(hex){
+    hex=hex.replace("#","");
+    if(hex.length===3){hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];}
+    var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255;
+    function f(c){return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);
+  }
+  function ratio(a,b){var l1=lum(a),l2=lum(b);var hi=Math.max(l1,l2),lo=Math.min(l1,l2);return (hi+0.05)/(lo+0.05);}
+  function updateContrast(){
+    var pairs=[
+      ["Main text on surface",getVal("--color-text"),getVal("--color-surface"),4.5],
+      ["Muted text on background",getVal("--color-muted"),getVal("--color-bg"),4.5],
+      ["White on primary action","#ffffff",getVal("--color-action"),4.5],
+      ["Success text on badge bg",getVal("--color-success"),getVal("--color-success-bg"),4.5],
+      ["Warning text on badge bg",getVal("--color-warning"),getVal("--color-warning-bg"),4.5],
+      ["Failure text on badge bg",getVal("--color-danger"),getVal("--color-danger-bg"),4.5],
+      ["Focus vs surface",getVal("--color-focus"),getVal("--color-surface"),3]
+    ];
+    var tb=document.querySelector("#contrastTable tbody");tb.innerHTML="";
+    pairs.forEach(function(p){
+      var r=ratio(p[1],p[2]);var ok=r>=p[3];
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>"+p[0]+"</td><td class='mono'>"+r.toFixed(2)+":1</td><td>"+p[3]+":1</td><td class='"+(ok?"pass":"fail")+"'>"+(ok?"Pass":"Fail")+"</td>";
+      tb.appendChild(tr);
+    });
+  }
+
+
+  /* Painter — seeded brushwork in the garden/Brabant/Clichy palette. Static; never animates. */
+  function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function pick(r,list){var tot=0,i;for(i=0;i<list.length;i++)tot+=list[i][1];var x=r()*tot;for(i=0;i<list.length;i++){x-=list[i][1];if(x<=0)return list[i][0];}return list[0][0];}
+  function stroke(ctx,x,y,a,len,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();
+    var dx=Math.cos(a)*len/2,dy=Math.sin(a)*len/2,bend=len*.18;
+    ctx.moveTo(x-dx,y-dy);ctx.quadraticCurveTo(x-dy*bend/len*2,y+dx*bend/len*2,x+dx,y+dy);ctx.stroke();}
+  function paintField(cv,mode){
+    if(!cv)return;var W=cv.clientWidth,H=cv.clientHeight;if(!W||!H)return;
+    var dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    var ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap="round";
+    var r=rng(mode==="hero"?1889:1890);
+    var D1=getVal("--d1"),D2=getVal("--d2"),D3=getVal("--d3"),D4=getVal("--d4");
+    var horizon=mode==="hero"?H*.72:H*.18;
+    // underpaint
+    var g=ctx.createLinearGradient(0,0,0,H);
+    if(mode==="hero"){g.addColorStop(0,"#a9b49c");g.addColorStop(.7,"#97a38a");g.addColorStop(.74,"#8a5a3c");g.addColorStop(1,"#7a3d27");}
+    else{g.addColorStop(0,"#97a38a");g.addColorStop(.2,"#8a5a3c");g.addColorStop(1,"#6f3522");}
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    // Brabant sky: swirling strokes along a flow field
+    var sky=[["#b9c3a8",5],["#8fa08a",5],[D3,4],["#a7b6b0",3],["#c9ccb2",3],["#6f8578",2],[D2,1.4],["#e3dcb8",1.2]];
+    var n=Math.round(W*horizon/34);
+    for(var i=0;i<n;i++){
+      var x=r()*W,y=r()*horizon;
+      var a=Math.sin(x*.012+Math.cos(y*.03)*1.6)*1.4+Math.cos(y*.02+x*.004)*1.1;
+      stroke(ctx,x,y,a,10+r()*16,3+r()*3.2,pick(r,sky));
+    }
+    // ochre contours over the clouds
+    var lines=mode==="hero"?Math.max(4,Math.round(H/70)):1;
+    for(var k=0;k<lines;k++){
+      var y0=mode==="hero"?(k+.6)*horizon/(lines+.3):horizon*.55,amp=6+r()*10,f=.012+r()*.01,ph=r()*6,x0=r()*W*.4-W*.1,x1=x0+W*(.4+r()*.7);
+      ctx.strokeStyle=D1;ctx.lineWidth=3.4+r()*1.4;ctx.globalAlpha=.95;ctx.beginPath();
+      for(var xx=x0;xx<x1;xx+=4){var yy=y0+Math.sin(xx*f+ph)*amp+Math.sin(xx*f*2.7)*amp*.35;if(xx===x0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}
+      ctx.stroke();ctx.strokeStyle="#ecd98a";ctx.lineWidth=1.2;ctx.stroke();ctx.globalAlpha=1;
+    }
+    // Brabant low red sun (hero only)
+    if(mode==="hero"){var sx=W*.08+W*.06,sy=horizon*.9;ctx.fillStyle=D1;ctx.beginPath();ctx.arc(sx,sy,18,Math.PI,0);ctx.fill();
+      ctx.strokeStyle=D4;ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx,sy,19,Math.PI*1.05,Math.PI*1.6);ctx.stroke();}
+    // horizon: garden's lavender/yellow band
+    ctx.globalAlpha=.9;
+    for(var j=0;j<W/5;j++){var hx=r()*W,hy=horizon-6+r()*10;stroke(ctx,hx,hy,(r()-.5)*.3,12+r()*14,3+r()*2,pick(r,[[D1,3],[D2,3],["#e8dfa6",2]]));}
+    ctx.globalAlpha=1;
+    // garden earth: dashes, slanting
+    var earth=[[D4,5],["#8e3a22",4],["#b5653c",3],["#6e5a3a",2],["#9a7a3e",1.5],["#5f6e4a",1.2],[D1,.6]];
+    var m=Math.round(W*(H-horizon)/26);
+    for(var e=0;e<m;e++){var ex=r()*W,ey=horizon+r()*(H-horizon);stroke(ctx,ex,ey,-.35+(r()-.5)*.6,8+r()*12,3+r()*2.5,pick(r,earth));}
+    // Clichy ticks: a light scatter of broken colour
+    var ticks=[["#cdbfdc",3],[D2,2],[D1,2],["#6d84a8",1.5],["#f4efdc",2]];
+    var tcount=Math.round(W*H/2600);
+    ctx.globalAlpha=.85;
+    for(var t=0;t<tcount;t++){stroke(ctx,r()*W,r()*H,-.5+r()*.4,5+r()*5,1.8+r()*1.2,pick(r,ticks));}
+    ctx.globalAlpha=1;
+  }
+  function repaint(){paintField(document.getElementById("heroPaint"),"hero");paintField(document.getElementById("footPaint"),"foot");}
+  var rpTimer=null;function repaintSoon(){clearTimeout(rpTimer);rpTimer=setTimeout(repaint,120);}
+  var lastW=window.innerWidth;
+  window.addEventListener("resize",function(){if(window.innerWidth!==lastW){lastW=window.innerWidth;repaintSoon();}});
+
+  var sp=document.getElementById("spacing");
+  [4,8,12,16,20,24,32,40].forEach(function(n){
+    var row=document.createElement("div");row.className="space-row";
+    var lab=document.createElement("span");lab.className="mono";lab.textContent=n+"px";
+    var bar=document.createElement("div");bar.className="space-bar";bar.style.width=n+"px";
+    row.appendChild(lab);row.appendChild(bar);sp.appendChild(row);
+  });
+
+  var dlg=document.getElementById("demoDialog");
+  var opener=document.getElementById("openDialog");
+  var lastFocus=null;
+  function openDlg(){lastFocus=document.activeElement;dlg.showModal();document.getElementById("closeDialog").focus();}
+  function closeDlg(){dlg.close();}
+  opener.addEventListener("click",openDlg);
+  document.getElementById("closeDialog").addEventListener("click",closeDlg);
+  document.getElementById("cancelDialog").addEventListener("click",closeDlg);
+  document.getElementById("confirmDialog").addEventListener("click",function(){closeDlg();toast("Regrade requested (demo)");});
+  dlg.addEventListener("click",function(e){if(e.target===dlg){closeDlg();}});
+  dlg.addEventListener("close",function(){if(lastFocus&&lastFocus.focus){lastFocus.focus();}});
+
+  var toastEl=document.getElementById("toast");var toastTimer=null;
+  function toast(msg){toastEl.textContent=msg;toastEl.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.classList.remove("show");},2200);}
+
+  document.getElementById("copyCss").addEventListener("click",function(){
+    var lines=["/* Garden study — asylum garden 1889, Brabant 1890, a touch of Clichy 1887. Accents have no status meaning; red earth is not failure. */",":root{"];
+    TOKENS.concat(DECO).forEach(function(t){lines.push("  "+t.v+": "+getVal(t.v)+";");});
+    lines.push("  --shadow: 0 10px 24px -10px #2c2a3340, 0 2px 6px #2c2a3314;");
+    lines.push("  --radius-panel: 12px 14px 11px 15px; --radius-header: 18px; --radius-button: 8px 10px 8px 9px;");
+    lines.push("}");
+    var css=lines.join("\n");
+    function done(){toast("Token CSS copied to clipboard");}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(css).then(done,function(){fallback(css,done);});}
+    else{fallback(css,done);}
+  });
+  function fallback(text,cb){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");cb();}catch(e){toast("Copy failed — select manually");}document.body.removeChild(ta);}
+
+  document.getElementById("resetTheme").addEventListener("click",function(){
+    TOKENS.concat(DECO).forEach(function(t){setVal(t.v,t.def);});
+    buildSwatches(TOKENS,document.getElementById("coreSwatches"));
+    buildSwatches(DECO,document.getElementById("decoSwatches"));
+    updateContrast();toast("Theme reset to the garden study");repaint();
+  });
+
+  var GROUPS=[
+    {name:"Visual identity",items:[
+      "Core colour tokens match the worksheet; decorative accents do not encode status.",
+      "Page titles use the display face; controls and data use sans-serif.",
+      "Each workspace page has one H1 and a clear task description.",
+      "Brushwork stays in decorative zones (hero, rules, card heads, footer); tables and inputs are readable and opaque.",
+      "Every decorative asset has correct attribution and a rights record."]},
+    {name:"Responsive behaviour",items:[
+      "Checked 1440, 1150, 900, 650, 390, 375px (and just above/below breakpoints).",
+      "Sidebar widths and main offsets agree; icons keep accessible names on mobile.",
+      "No unintended horizontal page overflow; wide tables scroll internally.",
+      "Long titles, labels, and captions wrap without covering controls.",
+      "At 200% zoom content is operable and dialogs keep reachable actions."]},
+    {name:"Interaction & accessibility",items:[
+      "Keyboard reaches navigation, actions, filters, and table disclosures.",
+      "Skip link targets main; focus indicators visible.",
+      "Dialog title, focus, Escape, and focus restoration work.",
+      "Statuses/errors use text + colour; fields have programmatic labels.",
+      "Essential text meets contrast, including new state combinations.",
+      "Reduced motion respected; compact controls enlarged for touch-heavy use.",
+      "Loading, empty, error, zero, and unavailable states tested separately."]},
+    {name:"Data & decoration behaviour",items:[
+      "Failures and incomplete coverage stay visible beside headline metrics.",
+      "Null/unavailable shows em dash; zero shows zero.",
+      "(If rotating) visits/refreshes advance imagery; polling does not.",
+      "(If rotating) every work appears once per bag; no immediate repeat at cycle boundaries.",
+      "(If rotating) back/forward, storage denial, damaged state, image failure handled; caption matches image."]}
+  ];
+  var STORE="ui-workbook-checks-v2";
+  var saved={};try{saved=JSON.parse(localStorage.getItem(STORE)||"{}");}catch(e){saved={};}
+  var cl=document.getElementById("checklists");
+  var allBoxes=[];
+  GROUPS.forEach(function(g,gi){
+    var wrap=document.createElement("div");wrap.className="check-group";
+    var h=document.createElement("h3");h.textContent=g.name;wrap.appendChild(h);
+    g.items.forEach(function(it,ii){
+      var key=gi+"-"+ii;
+      var lab=document.createElement("label");lab.className="check-item";
+      var cb=document.createElement("input");cb.type="checkbox";cb.checked=!!saved[key];
+      cb.addEventListener("change",function(){saved[key]=cb.checked;persist();updateProgress();});
+      var span=document.createElement("span");span.textContent=it;
+      lab.appendChild(cb);lab.appendChild(span);wrap.appendChild(lab);allBoxes.push(cb);
+    });
+    cl.appendChild(wrap);
+  });
+  function persist(){try{localStorage.setItem(STORE,JSON.stringify(saved));}catch(e){}}
+  function updateProgress(){
+    var done=allBoxes.filter(function(b){return b.checked;}).length;
+    var total=allBoxes.length;
+    document.getElementById("overallLabel").textContent=done+" of "+total+" complete";
+    document.getElementById("overallBar").style.width=(total?Math.round(done/total*100):0)+"%";
+  }
+  document.getElementById("clearChecks").addEventListener("click",function(){
+    allBoxes.forEach(function(b){b.checked=false;});saved={};persist();updateProgress();toast("Checklist cleared");
+  });
+
+  var PSTORE="ui-workbook-product-v2";
+  var pFields=["pName","pTask","pMetrics","pDepart"];
+  var pSaved={};try{pSaved=JSON.parse(localStorage.getItem(PSTORE)||"{}");}catch(e){pSaved={};}
+  pFields.forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    if(pSaved[id])el.value=pSaved[id];
+    el.addEventListener("input",function(){pSaved[id]=el.value;try{localStorage.setItem(PSTORE,JSON.stringify(pSaved));}catch(e){}});
+  });
+
+  buildSwatches(TOKENS,document.getElementById("coreSwatches"));
+  buildSwatches(DECO,document.getElementById("decoSwatches"));
+  updateContrast();
+  updateProgress();
+  repaint();
+})();
+</script>
+</body>
+</html>

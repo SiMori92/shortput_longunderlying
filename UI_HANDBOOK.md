@@ -377,6 +377,8 @@ When the brand evolves, update this handbook with the corresponding token, compo
 
 ## Strategy Monitor adoption · 22 November 2026
 
+> **Superseded for Strategy Monitor on 25 November 2026.** This app now follows the Garden study in `UI_DESIGN_WORKBOOK.html` (v3.0). The ivory/blue Appendix A theme above remains the reference for other apps. Departures and verification are recorded in `reports/UI-v3.md`; the work plan is `PLAN - UI revamp to garden study v3.md`. The notes below describe the 22 November adoption and are kept for history.
+
 This repository adopts the handbook through `src/app/globals.css`, `src/components/page-heading.tsx`, `src/components/artwork-header.tsx`, `src/ui/artwork.ts` and `src/ui/artwork-catalog.json`. The original implementation map above describes the Benchmark reference app, not files already available in Strategy Monitor.
 
 Intentional adaptations:
