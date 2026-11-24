@@ -3,9 +3,12 @@ import { rm } from "node:fs/promises";
 test.describe.configure({ mode: "serial" });
 test.beforeAll(async () => { await rm(".e2e-data/auth", { recursive: true, force: true }); });
 test("anonymous pages, RSC and APIs are private; health and login are public", async ({ page, request }) => {
-  for (const path of ["/", "/gate", "/puts", "/portfolio", "/monitor", "/spax", "/backtest", "/rules", "/unknown"]) {
+  for (const path of ["/", "/gate", "/puts", "/portfolio", "/monitor", "/backtest", "/rules", "/unknown"]) {
     const response = await request.get(path, { maxRedirects: 0 }); expect(response.status()).toBe(307); expect(response.headers().location).toContain("/login");
   }
+  // /spax is a config-level alias for /monitor (a real 307 before rendering); following it still ends at login.
+  const alias = await request.get("/spax", { maxRedirects: 0 }); expect(alias.status()).toBe(307); expect(alias.headers().location).toMatch(/\/monitor$/);
+  expect(new URL((await request.get("/spax")).url()).pathname).toBe("/login");
   for (const path of ["/api/runs", "/api/portfolio", "/api/monitors", "/api/unknown"]) expect((await request.get(path)).status()).toBe(401);
   const rsc = await request.get("/portfolio?_rsc=private", { headers: { RSC: "1", "x-middleware-subrequest": "src/proxy:src/proxy:src/proxy:src/proxy:src/proxy" }, maxRedirects: 0 }); expect(rsc.status()).toBe(307);
   expect((await request.get("/api/health")).status()).toBe(200);

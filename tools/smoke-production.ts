@@ -87,7 +87,7 @@ try {
     assert(heading?.includes(title!),`Missing page heading: ${url}`);
   }
   // The ticker cookie switches every page to SPAX; its gate stays honest about short history.
-  for (const [url,text] of [["/","V3.1 · SPAX vs SPCX"],["/monitor","SPAX monitor"],["/backtest","Not enough SPAX history"],["/portfolio","ENTERED ACCOUNT · SPAX"]]) {
+  for (const [url,text] of [["/","V3.1 · SPAX vs SPCX"],["/monitor","SPAX monitor"],["/backtest","Not enough SPAX history"],["/portfolio","Entered account · SPAX"]]) {
     const response=await fetch(base+url,{headers:{...authorized,cookie:`${cookie}; strategy_symbol=SPAX`},redirect:"manual"}); assert.equal(response.status,200,`SPAX ${url}`);
     assert((await response.text()).replace(/<!-- -->/g,"").includes(text!),`SPAX ${url} missing ${text}`);
   }
