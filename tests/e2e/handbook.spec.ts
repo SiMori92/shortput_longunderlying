@@ -6,7 +6,7 @@ test("handbook shell keeps decisions legible at target widths", async ({ page })
     await page.goto("/");
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByRole("heading", { name: "Today's actions" })).toBeVisible();
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(247, 245, 239)");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(214, 217, 198)");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width === 1440) {
       await expect(page.locator(".artwork-caption a")).toBeVisible();
