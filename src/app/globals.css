@@ -274,6 +274,15 @@ details>summary.disclosure-title{list-style-position:inside}
 /* ── State views */
 .empty-state{min-height:110px; display:flex; align-items:center; justify-content:center; gap:12px; color:var(--color-muted); font-size:13px; text-align:center; padding:20px}
 .empty-state svg{flex:none}
+.empty-state .text-link{margin-left:8px}
+.unavailable{font-family:var(--serif); color:var(--color-muted); font-weight:400}
+.skeleton{height:12px; border-radius:6px; background:#d9d6c7; margin-bottom:10px; animation:pulse 1.4s ease-in-out infinite}
+.skeleton.tall{height:30px}
+.skeleton.w40{width:40%} .skeleton.w60{width:60%} .skeleton.w80{width:80%}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.loading-heading{background:linear-gradient(#a9b49c,#97a38a 70%,#8a5a3c 74%,#7a3d27)}
+.loading-heading .page-plaque{min-height:150px}
+.loading-card{min-height:220px}
 
 /* ── Metric cards: positional painted band (ochre, lavender, sage, red earth), not status */
 .metric-grid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px}
@@ -354,6 +363,8 @@ details>summary.disclosure-title{list-style-position:inside}
 .heat-legend i{width:16px; height:12px; border-radius:3px; display:inline-block; box-shadow:0 0 0 1px #2c2a3326}
 
 /* ── Monitor */
+.checks-summary{font-size:13px; color:var(--color-muted); margin-bottom:-8px}
+.checks-summary strong{font-family:var(--serif); font-size:17px; color:var(--color-text)}
 .monitor-checklist{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px}
 .monitor-check{display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:16px; min-width:0}
 .monitor-check .section-heading{margin:0; width:100%; align-items:flex-start; flex-wrap:nowrap}
