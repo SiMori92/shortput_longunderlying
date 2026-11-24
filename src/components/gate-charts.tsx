@@ -37,7 +37,7 @@ export function GateCharts({ points, threshold, reference = "SOXX" }: { points: 
     <div className="section-heading"><h2>{reference} trend <Working label={`${reference} trend chart`} formula={`${reference} close; rolling arithmetic means after feature warm-up`} inputs="Price and SMA are stored-history model context; hover, tap or focus the chart and use arrow keys for exact values" /></h2><div className="segmented" role="group" aria-label="Chart period">{[1, 5].map(y => <button type="button" key={y} disabled={!hydrated} aria-pressed={years === y} onClick={() => setYears(y)}>{y}Y</button>)}</div></div>
     <p className="chart-sub">{data[0]?.date ?? "—"} → {end || "—"} · {data.length} stored sessions · ends at the earliest last date across the required input files · shading shows the V3.1 gate state</p>
     <ChartLegend items={[...trend.map(t => ({ label: t.name, color: t.color })), ...(["ON", "RISK CUT", "OFF"] as const).map(state => { const Icon = bandIcon[state]; return { label: state, color: bandColor[state]!, icon: <Icon size={14} color={bandColor[state]} aria-hidden="true" /> }; })]} />
-    <div className="chart-frame" aria-label={`${reference} price and moving averages`}><ResponsiveContainer width="100%" height="100%" onResize={w => setWidth(w)}><LineChart data={data} margin={{ top: 12, right, bottom: 4, left: -16 }} accessibilityLayer>
+    <div className="chart-frame" role="figure" aria-label={`${reference} price and moving averages`}><ResponsiveContainer width="100%" height="100%" onResize={w => setWidth(w)}><LineChart data={data} margin={{ top: 12, right, bottom: 4, left: -16 }} accessibilityLayer>
       <CartesianGrid {...gridProps} />
       <XAxis dataKey="date" {...axisProps} minTickGap={55} tickFormatter={v => String(v).slice(2, 7)} />
       <YAxis {...axisProps} domain={["auto", "auto"]} />
@@ -51,7 +51,7 @@ export function GateCharts({ points, threshold, reference = "SOXX" }: { points: 
       <div className="section-heading"><h2>Volatility brake <Working label="Volatility ratio chart" formula="RV10 / RV60; RVn = sample std(log returns, n) × √252" inputs={`Fail above ${threshold}; equality passes`} /></h2><span className="chip">RV10 / RV60</span></div>
       <p className="chart-sub">Brake fails above {threshold}; equality passes</p>
       <ChartLegend items={[{ label: "RV10 / RV60", color: series(1) }, { label: `Brake ${threshold}`, color: INK_2, kind: "dashed" }]} />
-      <div className="chart-frame short" aria-label="Realized volatility ratio"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 18, right, bottom: 4, left: -16 }} accessibilityLayer>
+      <div className="chart-frame short" role="figure" aria-label="Realized volatility ratio"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 18, right, bottom: 4, left: -16 }} accessibilityLayer>
         <CartesianGrid {...gridProps} />
         <XAxis dataKey="date" {...axisProps} minTickGap={55} tickFormatter={v => String(v).slice(2, 7)} />
         <YAxis {...axisProps} domain={[0, "auto"]} />

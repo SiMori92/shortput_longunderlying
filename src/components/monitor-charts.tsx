@@ -26,7 +26,7 @@ export function MonitorCharts({ monitor: m, ipoPrice, smaFast, smaSlow }: { moni
       {!data.length ? <Empty>No stored price history</Empty> : <>
         <p className="chart-sub">{data[0]!.date} → {last!.date} · {data.length} stored sessions{isRef ? ` · SMA${smaFast} provisional before ${smaSlow} sessions` : ""}</p>
         <ChartLegend items={[...lines.map(l => ({ label: l.key === "close" ? "Stored close" : l.name, color: l.color })), { label: "Peak", color: INK_2, kind: "dashed" as const }, ...(isRef && ipoPrice !== null ? [{ label: "IPO · provisional", color: INK_2, kind: "dashed" as const }] : [])]} />
-        <div className="chart-frame" aria-label={`${symbol} price history`}><ResponsiveContainer width="100%" height="100%" onResize={w => setWidth(w)}><LineChart data={data} accessibilityLayer margin={{ top: 20, right, bottom: 4, left: -16 }}>
+        <div className="chart-frame" role="figure" aria-label={`${symbol} price history`}><ResponsiveContainer width="100%" height="100%" onResize={w => setWidth(w)}><LineChart data={data} accessibilityLayer margin={{ top: 20, right, bottom: 4, left: -16 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="date" {...axisProps} minTickGap={50} tickFormatter={ticks(data)} />
           <YAxis {...axisProps} domain={["auto", "auto"]} />
@@ -44,7 +44,7 @@ export function MonitorCharts({ monitor: m, ipoPrice, smaFast, smaSlow }: { moni
       {!tracking.length ? <Empty>Tracking needs adjacent overlapping sessions</Empty> : <>
         <p className="chart-sub">{tracking.length} overlapping sessions · price returns</p>
         <ChartLegend items={[{ label: `${m.symbol} daily return`, color: series(1) }, { label: `${m.leverage}× ${m.reference} daily return`, color: series(2), kind: "dashed" }]} />
-        <div className="chart-frame short" aria-label="Daily leveraged tracking"><ResponsiveContainer width="100%" height="100%"><LineChart data={tracking} accessibilityLayer margin={{ top: 16, right: 16, bottom: 4, left: -12 }}>
+        <div className="chart-frame short" role="figure" aria-label="Daily leveraged tracking"><ResponsiveContainer width="100%" height="100%"><LineChart data={tracking} accessibilityLayer margin={{ top: 16, right: 16, bottom: 4, left: -12 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="date" {...axisProps} minTickGap={55} tickFormatter={ticks(tracking)} />
           <YAxis {...axisProps} tickFormatter={v => `${(Number(v) * 100).toFixed(0)}%`} />
@@ -60,7 +60,7 @@ export function MonitorCharts({ monitor: m, ipoPrice, smaFast, smaSlow }: { moni
       <div className="section-heading"><h2>Cumulative tracking gap <Working label="Cumulative tracking gap chart" formula="product(1+ETF daily returns) − product(1+L×reference daily returns); percentage-point difference" inputs="Same contiguous overlap and baseline; daily reset compounding, not L × cumulative reference return. Raw closes; distributions unadjusted." /></h2><span className="chip">Price return · contiguous overlap</span></div>
       {!tracking.length ? <Empty>No comparable tracking window</Empty> : <>
         <ChartLegend items={[{ label: "Cumulative price tracking gap", color: series(1) }]} />
-        <div className="chart-frame short" aria-label="Cumulative leveraged tracking gap"><ResponsiveContainer width="100%" height="100%"><LineChart data={tracking} accessibilityLayer margin={{ top: 16, right: roomy ? 84 : 60, bottom: 4, left: -12 }}>
+        <div className="chart-frame short" role="figure" aria-label="Cumulative leveraged tracking gap"><ResponsiveContainer width="100%" height="100%"><LineChart data={tracking} accessibilityLayer margin={{ top: 16, right: roomy ? 84 : 60, bottom: 4, left: -12 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="date" {...axisProps} minTickGap={55} tickFormatter={ticks(tracking)} />
           <YAxis {...axisProps} tickFormatter={v => `${(Number(v) * 100).toFixed(1)}pp`} />

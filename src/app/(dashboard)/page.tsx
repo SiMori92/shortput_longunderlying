@@ -51,6 +51,6 @@ export default async function Today() {
     })}</div>
     {!!run?.changesSincePreview.length && <section className="card"><h2>Changed since preview</h2><ul className="changes-list">{run.changesSincePreview.map(c => <li key={c}>{c}</li>)}</ul></section>}
     <RunStatus symbol={symbol} /><Link href="/puts" className="card monitor-link"><ArrowDownToLine size={22} aria-hidden="true" /><strong>Put book & model history</strong><ArrowRight size={18} aria-hidden="true" /></Link>
-    <details className="card"><summary className="disclosure-title">Calculation notes <Working label="Execution timing" formula="targetQty = targetWeight × previousEquity / executionPrice" inputs="Decision at close; trade next close; reprice at execution; band uses previous equity" /></summary><p className="muted small">Core quantities are next-close estimates. Option prices are model values per share. A blocked decision is unconfirmed, even when stored-history conditions are visible.</p></details>
+    <details className="card"><summary className="disclosure-title">Calculation notes</summary><div className="muted small">Core quantities are next-close estimates. Option prices are model values per share. A blocked decision is unconfirmed, even when stored-history conditions are visible. <span className="number-working">Execution timing<Working label="Execution timing" formula="targetQty = targetWeight × previousEquity / executionPrice" inputs="Decision at close; trade next close; reprice at execution; band uses previous equity" /></span></div></details>
   </div>;
 }
