@@ -10,6 +10,12 @@ export function canAcceptToday(chart: YahooChart, now: Date): boolean {
   // Meta must describe TODAY, not a previous session whose end is already past.
   return !!regular && marketDate(new Date(regular.start * 1000)) === marketDate(now) && now.getTime() >= regular.end * 1000;
 }
+/** Official close for session `d` from chart meta, or null unless the quote is stamped at/after that same session's regular end. */
+export function sessionClose(chart: YahooChart, d: string): number | null {
+  const { regularMarketPrice: price, regularMarketTime: time } = chart.meta, end = chart.meta.currentTradingPeriod?.regular.end;
+  if (price === undefined || time === undefined || end === undefined) return null;
+  return marketDate(new Date(end * 1000)) === d && marketDate(new Date(time * 1000)) === d && time >= end ? price : null;
+}
 export function validateUpdate(symbol: string, existing: readonly Bar[], chart: YahooChart, options: {
   now: Date; asOf: string; preview: boolean; knownSplits: readonly { date: string; factor: number }[]; knownGaps?: readonly { date: string }[]; reference: boolean;
 }) {
@@ -33,7 +39,13 @@ export function validateUpdate(symbol: string, existing: readonly Bar[], chart: 
     if (live && (chart.meta.regularMarketTime === undefined || marketDate(new Date(chart.meta.regularMarketTime * 1000)) !== today || options.now.getTime() - chart.meta.regularMarketTime * 1000 > 30 * 60 * 1000 || chart.meta.regularMarketTime * 1000 > options.now.getTime() + 60000 || marketMinute(options.now) < 570)) {
       issues.push(dataIssue("stale", symbol, "Preview quote is missing, stale or outside the regular session")); continue;
     }
-    const parsed = BarSchema.safeParse({ date: d, open: quote.open[i], high: quote.high[i], low: quote.low[i], close: live ? chart.meta.regularMarketPrice : quote.close[i], volume: quote.volume[i], adjclose: adjusted?.[i] ?? null });
+    let close = live ? chart.meta.regularMarketPrice : quote.close[i], adjclose = adjusted?.[i] ?? null;
+    // Yahoo can leave the newest daily close (and adjclose) null for hours after the bell while O/H/L/V
+    // are present. Fill it only from meta.regularMarketPrice stamped at/after THAT session's regular end,
+    // i.e. the official close; the latest bar's adjclose equals its close. Visible, non-blocking.
+    const settled = !live && (close === null || close === undefined) ? sessionClose(chart, d) : null;
+    if (settled !== null) { close = settled; adjclose ??= settled; issues.push(dataIssue("partial", symbol, `Daily close at ${d} missing in Yahoo series; used session-end quote ${settled}`, false)); }
+    const parsed = BarSchema.safeParse({ date: d, open: quote.open[i], high: quote.high[i], low: quote.low[i], close, volume: quote.volume[i], adjclose });
     if (!parsed.success) { issues.push(dataIssue("schema", symbol, `Incomplete/invalid OHLCV at ${d}`)); continue; }
     if (symbol !== "^IRX" && [parsed.data.open, parsed.data.high, parsed.data.low, parsed.data.close].some(p => p <= 0)) { issues.push(dataIssue("schema", symbol, `Nonpositive price at ${d}`)); continue; }
     try { if (!session(d) && !symbol.startsWith("^")) { issues.push(dataIssue("calendar", symbol, `Bar on non-NYSE session ${d}`)); continue; } }

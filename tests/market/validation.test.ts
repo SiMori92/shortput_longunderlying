@@ -56,6 +56,20 @@ it("flags missing sessions, stale data, >40% reference moves, duplicates and nul
   const nullQuote = chart([bar("2026-11-17")]); nullQuote.indicators.quote[0]!.close[0] = null;
   expect(validateUpdate("SOXL", [], nullQuote, options).acceptable).toBe(false);
 });
+it("fills a null newest close only from a same-session, session-end meta quote", () => {
+  const value = chart([bar("2026-11-16"), bar("2026-11-17")]);
+  value.indicators.quote[0]!.close[1] = null;
+  value.meta.currentTradingPeriod = { regular: { start: Date.parse("2026-11-17T14:30:00Z") / 1000, end: Date.parse("2026-11-17T21:00:00Z") / 1000 } };
+  value.meta.regularMarketPrice = 100.5; value.meta.regularMarketTime = Date.parse("2026-11-17T21:00:00Z") / 1000;
+  const result = validateUpdate("SOXL", [bar("2026-11-16")], value, options);
+  expect(result.acceptable).toBe(true);
+  expect(result.stored!.bars.at(-1)).toMatchObject({ date: "2026-11-17", close: 100.5, adjclose: 100.5 });
+  expect(result.issues.some(i => i.code === "partial" && !i.blocking)).toBe(true);
+  value.meta.regularMarketTime -= 60; // quote before the bell is not the official close
+  expect(validateUpdate("SOXL", [bar("2026-11-16")], value, options).acceptable).toBe(false);
+  value.meta.regularMarketTime += 60; value.meta.regularMarketPrice = 105; // outside the bar's high/low
+  expect(validateUpdate("SOXL", [bar("2026-11-16")], value, options).acceptable).toBe(false);
+});
 it("handles midnight-UTC Cboe daily labels and ignores NYSE holidays in missing checks", () => {
   const value = chart([bar("2026-11-25"), bar("2026-11-27")], "^IRX");
   value.meta.exchangeTimezoneName = "America/Chicago";
