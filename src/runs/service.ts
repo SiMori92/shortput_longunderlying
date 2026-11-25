@@ -110,13 +110,14 @@ export async function runScheduled(type: "preview" | "final" | "catchup", option
   if (!session(today)) return JobOutcomeSchema.parse({ status: "skipped", reason: "NYSE closed", runId: null });
   const date = type === "catchup" ? previousSession(today) : today;
   if (type === "catchup") {
-    // Skip only when every ticker already has a final for that session that wasn't blocked by missing market data.
+    // Skip only when every ticker already has a final for that session that wasn't blocked by missing or
+    // malformed market data. "schema" covers Yahoo's transient null/partial daily bars, which Yahoo back-fills later.
     const finals = await Promise.all(STRATEGY_SYMBOLS.map(async symbol => {
       const dir = strategyRoot(root, symbol);
       for (const name of ["final", "final.failed", "catchup.failed"]) { const run = await readOptionalRun(path.join(dir, "runs", `${date}_${name}.json`)); if (run) return run; }
       return null;
     }));
-    const settled = finals.every(f => f && (f.freshness.status === "valid" || !f.freshness.issues.some(i => i.blocking && ["fetch", "stale", "partial"].includes(i.code))));
+    const settled = finals.every(f => f && (f.freshness.status === "valid" || !f.freshness.issues.some(i => i.blocking && ["fetch", "stale", "partial", "schema"].includes(i.code))));
     if (settled) return JobOutcomeSchema.parse({ status: "skipped", reason: "Previous session final exists", runId: finals[0]!.id });
   }
   const run = await createRun({ type, date }, { ...options, now, root });

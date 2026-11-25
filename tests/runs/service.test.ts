@@ -124,6 +124,18 @@ it("failed nightly replay does not promote a final; catch-up can recover after r
   await writeFile(archive, saved);
   expect((await runScheduled("catchup", { root, fetcher, now: new Date("2026-11-17T12:00:00Z") })).status).toBe("completed");
 });
+it("catch-up retries a final blocked by a transient Yahoo null close", async () => {
+  const { root, fetcher } = await setup();
+  const nullClose: typeof fetch = async (input, init) => {
+    const response = await fetcher(input, init); if (!response.ok) return response;
+    const body = await response.json(); const close = body.chart.result[0].indicators.quote[0].close; close[close.length - 1] = null;
+    return Response.json(body);
+  };
+  const blocked = await createRun({ type: "final", date: "2026-11-16" }, { root, fetcher: nullClose, now: new Date("2026-11-16T21:20:00Z") });
+  expect(blocked.freshness.issues.some(i => i.code === "schema" && i.blocking)).toBe(true);
+  expect((await runScheduled("catchup", { root, fetcher, now: new Date("2026-11-17T12:00:00Z") })).status).toBe("completed");
+  expect((await readJson(path.join(root, "runs/2026-11-16_final.json"), RunResultSchema)).freshness.status).toBe("valid");
+});
 it("persists full monitor JSON during final and preview runs without adding monitor actions", async()=>{
  const {root,fetcher}=await setup();
  const registry=await readJson(path.join(root,"config/underlyings.json"),UnderlyingsSchema);
